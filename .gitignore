@@ -1,6 +1,4 @@
 node_modules/
 dist/
-database.sqlite
-database.sqlite-journal
 .env
 *.log
