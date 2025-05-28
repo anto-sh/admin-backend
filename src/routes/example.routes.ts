@@ -15,4 +15,4 @@ router.get("/:id", getExample as RequestHandler);
 router.put("/:id", updateExample as RequestHandler);
 router.delete("/:id", deleteExample as RequestHandler);
 
-export default router;
+export const exampleRoutes = router;

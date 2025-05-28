@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Example } from "../models/entities/example.entity";
+import { Treatment } from "../models/entities/treatment.entity";
 
 export const AppDataSource = new DataSource({
   type: "better-sqlite3",
@@ -8,5 +9,5 @@ export const AppDataSource = new DataSource({
   database: "../db/db.sqlite",
   synchronize: true,
   logging: true,
-  entities: [Example],
+  entities: [Example, Treatment],
 });

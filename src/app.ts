@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import exampleRoutes from "./routes/example.routes";
+import { exampleRoutes } from "./routes/example.routes";
+import { treatmentRoutes } from "./routes/treatment.routes";
 
 require("dotenv").config();
 
@@ -13,6 +14,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/api/examples", exampleRoutes);
+app.use("/api/treatments", treatmentRoutes);
 
 // Error handling
 app.use(
