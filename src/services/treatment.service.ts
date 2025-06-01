@@ -2,6 +2,7 @@ import { AppDataSource } from "../config/database.config";
 import { Treatment } from "../models/entities/treatment.entity";
 import {
   CreateTreatmentDto,
+  UpdateTreatmentBatchDto,
   UpdateTreatmentDto,
 } from "../models/dto/treatment.dto";
 import { UpdateResult } from "typeorm";
@@ -24,6 +25,12 @@ export const updateTreatment = async (
   dto: UpdateTreatmentDto
 ): Promise<UpdateResult | null> => {
   return await treatmentRepository.update(id, dto);
+};
+
+export const updateTreatmentBatch = async (
+  treatmentsToUpdate: UpdateTreatmentBatchDto[]
+): Promise<void> => {
+  await treatmentRepository.save(treatmentsToUpdate);
 };
 
 export const deleteTreatment = async (id: number): Promise<boolean> => {

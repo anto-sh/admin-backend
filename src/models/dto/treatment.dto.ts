@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 
 export class CreateTreatmentDto {
   @IsString()
@@ -13,4 +13,11 @@ export class UpdateTreatmentDto {
 export interface TreatmentResponseDto {
   id: number;
   name: string;
+}
+
+export class UpdateTreatmentBatchDto {
+  @IsNumber()
+  id!: number;
+  @IsString()
+  name!: string;
 }

@@ -4,10 +4,11 @@ import {
   CreateTreatmentDto,
   UpdateTreatmentDto,
   TreatmentResponseDto,
+  UpdateTreatmentBatchDto,
 } from "../models/dto/treatment.dto";
 import { Treatment } from "../models/entities/treatment.entity";
 import { validate } from "class-validator";
-import { plainToClass } from "class-transformer";
+import { plainToClass, plainToInstance } from "class-transformer";
 import { sendResponse } from "../utils/api-response";
 import { handleError } from "../utils/error-handler";
 
@@ -68,6 +69,30 @@ export const updateTreatment = async (req: Request, res: Response) => {
     if (!treatment) {
       return res.status(404).json({ message: "Treatment not found" });
     }
+
+    sendResponse(res, {
+      status: "success",
+      message: `Опция лечений № ${id} успешно обновлена`,
+    });
+  } catch (error) {
+    handleError(res, error as Error);
+  }
+};
+
+export const updateTreatmentBatch = async (req: Request, res: Response) => {
+  try {
+    const dtoArr = plainToInstance(
+      UpdateTreatmentBatchDto,
+      req.body as UpdateTreatmentBatchDto[]
+    );
+
+    const errors = await Promise.all(dtoArr.map((dto) => validate(dto)));
+
+    if (errors.flat().length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    await treatmentService.updateTreatmentBatch(dtoArr);
 
     sendResponse(res, {
       status: "success",
