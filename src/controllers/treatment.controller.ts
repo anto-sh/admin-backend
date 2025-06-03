@@ -23,7 +23,8 @@ export const createTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      return res.status(400).json({ errors });
+      handleError(res, new Error("Validation errors"), 400, { errors });
+      return
     }
 
     const treatment = await treatmentService.createTreatment(dto);
@@ -35,6 +36,7 @@ export const createTreatment = async (req: Request, res: Response) => {
       data,
     });
   } catch (error) {
+    console.log("УХТЫ:", error)
     handleError(res, error as Error);
   }
 };
@@ -61,13 +63,15 @@ export const updateTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      return res.status(400).json({ errors });
+      handleError(res, new Error("Validation errors"), 400, { errors });
+      return
     }
 
-    const treatment = await treatmentService.updateTreatment(id, dto);
+    const updateResult = await treatmentService.updateTreatment(id, dto);
 
-    if (!treatment) {
-      return res.status(404).json({ message: "Treatment not found" });
+    if (!updateResult?.affected) {
+      handleError(res, new Error("Treatment not found"), 404);
+      return
     }
 
     sendResponse(res, {
@@ -89,7 +93,8 @@ export const updateTreatmentBatch = async (req: Request, res: Response) => {
     const errors = await Promise.all(dtoArr.map((dto) => validate(dto)));
 
     if (errors.flat().length > 0) {
-      return res.status(400).json({ errors });
+      handleError(res, new Error("Validation errors"), 400, { errors });
+      return
     }
 
     await treatmentService.updateTreatmentBatch(dtoArr);
@@ -109,7 +114,8 @@ export const deleteTreatment = async (req: Request, res: Response) => {
     const success = await treatmentService.deleteTreatment(id);
 
     if (!success) {
-      return res.status(404).json({ message: "Treatment not found" });
+      handleError(res, new Error("Treatment not found"), 404);
+      return
     }
 
     res.status(204).send();
