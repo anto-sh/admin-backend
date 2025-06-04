@@ -36,7 +36,6 @@ export const createTreatment = async (req: Request, res: Response) => {
       data,
     });
   } catch (error) {
-    console.log("УХТЫ:", error)
     handleError(res, error as Error);
   }
 };
@@ -44,7 +43,6 @@ export const createTreatment = async (req: Request, res: Response) => {
 export const getAllTreatments = async (req: Request, res: Response) => {
   try {
     const treatments = await treatmentService.getAllTreatments();
-    console.log(treatments);
     const data = treatments.map(toResponseDto);
     sendResponse(res, {
       status: "success",
