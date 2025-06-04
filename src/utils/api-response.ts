@@ -6,7 +6,7 @@ export function sendResponse<T>(
   options: {
     status?: "success" | "error";
     code?: number;
-    message: string;
+    message?: string;
     data?: T;
     headers?: Record<string, string>;
   }
@@ -14,7 +14,7 @@ export function sendResponse<T>(
   const {
     status = "success",
     code = 200,
-    message,
+    message = "",
     data,
     headers = {},
   } = options;

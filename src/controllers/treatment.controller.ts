@@ -24,7 +24,7 @@ export const createTreatment = async (req: Request, res: Response) => {
 
     if (errors.length > 0) {
       handleError(res, new Error("Validation errors"), 400, { errors });
-      return
+      return;
     }
 
     const treatment = await treatmentService.createTreatment(dto);
@@ -32,7 +32,7 @@ export const createTreatment = async (req: Request, res: Response) => {
     sendResponse(res, {
       status: "success",
       code: 201,
-      message: "Data retrieved successfully",
+      message: "Новый опция предлагаемого лечения успешно добавлена",
       data,
     });
   } catch (error) {
@@ -46,7 +46,6 @@ export const getAllTreatments = async (req: Request, res: Response) => {
     const data = treatments.map(toResponseDto);
     sendResponse(res, {
       status: "success",
-      message: "Data retrieved successfully",
       data,
     });
   } catch (error) {
@@ -61,20 +60,20 @@ export const updateTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Validation errors"), 400, { errors });
-      return
+      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      return;
     }
 
     const updateResult = await treatmentService.updateTreatment(id, dto);
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Treatment not found"), 404);
-      return
+      handleError(res, new Error("Опция не найдена"), 404);
+      return;
     }
 
     sendResponse(res, {
       status: "success",
-      message: `Опция лечений № ${id} успешно обновлена`,
+      message: `Опция предлагаемого лечения № ${id} успешно обновлена`,
     });
   } catch (error) {
     handleError(res, error as Error);
@@ -92,7 +91,7 @@ export const updateTreatmentBatch = async (req: Request, res: Response) => {
 
     if (errors.flat().length > 0) {
       handleError(res, new Error("Validation errors"), 400, { errors });
-      return
+      return;
     }
 
     await treatmentService.updateTreatmentBatch(dtoArr);
@@ -112,11 +111,14 @@ export const deleteTreatment = async (req: Request, res: Response) => {
     const success = await treatmentService.deleteTreatment(id);
 
     if (!success) {
-      handleError(res, new Error("Treatment not found"), 404);
-      return
+      handleError(res, new Error("Опция не найдена"), 404);
+      return;
     }
 
-    res.status(204).send();
+    sendResponse(res, {
+      status: "success",
+      message: "Опция предлагаемого лечения успешно удалена",
+    });
   } catch (error) {
     handleError(res, error as Error);
   }
