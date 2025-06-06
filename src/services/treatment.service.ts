@@ -9,15 +9,15 @@ import { UpdateResult } from "typeorm";
 
 const treatmentRepository = AppDataSource.getRepository(Treatment);
 
+export const getAllTreatments = async (): Promise<Treatment[]> => {
+  return await treatmentRepository.find();
+};
+
 export const createTreatment = async (
   dto: CreateTreatmentDto
 ): Promise<Treatment> => {
   const treatment = Treatment.fromDto(dto);
   return await treatmentRepository.save(treatment);
-};
-
-export const getAllTreatments = async (): Promise<Treatment[]> => {
-  return await treatmentRepository.find();
 };
 
 export const updateTreatment = async (

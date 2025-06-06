@@ -12,7 +12,7 @@ export class UpdateTreatmentDto {
 
 export interface TreatmentResponseDto {
   id: number;
-  name: string;
+  name?: string;
 }
 
 export class UpdateTreatmentBatchDto {

@@ -1,7 +1,7 @@
 import { RequestHandler, Router } from "express";
 import {
-  createTreatment,
   getAllTreatments,
+  createTreatment,
   updateTreatment,
   deleteTreatment,
   updateTreatmentBatch,
@@ -9,8 +9,8 @@ import {
 
 const router = Router();
 
-router.post("/", createTreatment as RequestHandler);
 router.get("/", getAllTreatments as RequestHandler);
+router.post("/", createTreatment as RequestHandler);
 router.put("/:id", updateTreatment as RequestHandler);
 router.patch("/", updateTreatmentBatch as RequestHandler);
 router.delete("/:id", deleteTreatment as RequestHandler);

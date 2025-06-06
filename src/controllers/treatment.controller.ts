@@ -23,7 +23,7 @@ export const createTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Validation errors"), 400, { errors });
+      handleError(res, new Error("Ошибки валидации"), 400, { errors });
       return;
     }
 
@@ -32,7 +32,7 @@ export const createTreatment = async (req: Request, res: Response) => {
     sendResponse(res, {
       status: "success",
       code: 201,
-      message: "Новый опция предлагаемого лечения успешно добавлена",
+      message: "Новая опция предлагаемого лечения успешно добавлена",
       data,
     });
   } catch (error) {
@@ -90,7 +90,7 @@ export const updateTreatmentBatch = async (req: Request, res: Response) => {
     const errors = await Promise.all(dtoArr.map((dto) => validate(dto)));
 
     if (errors.flat().length > 0) {
-      handleError(res, new Error("Validation errors"), 400, { errors });
+      handleError(res, new Error("Ошибки валидации"), 400, { errors });
       return;
     }
 
