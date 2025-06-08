@@ -58,7 +58,8 @@ export const createExerciseCategory = async (req: Request, res: Response) => {
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
+    else handleError(res, error as Error);
   }
 };
 
@@ -88,7 +89,8 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
       message: `Категория № ${id} успешно обновлена`,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
+    else handleError(res, error as Error);
   }
 };
 

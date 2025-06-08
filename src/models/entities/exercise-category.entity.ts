@@ -1,8 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Unique } from "typeorm";
 import { Exercise } from "./exercise.entity";
 import { CreateExerciseCategoryDto } from "../dto/exercise-category.dto";
 
 @Entity("exercise_category")
+@Unique(["name"])
+@Unique(["url"])
 export class ExerciseCategory {
   @PrimaryGeneratedColumn()
   id!: number;
