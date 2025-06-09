@@ -22,7 +22,7 @@ export class UpdateExerciseDto {
   categoryId?: number;
 
   @IsObject()
-  contentJson?: any;
+  contentJson: any;
 }
 
 export interface ExerciseResponseDto {

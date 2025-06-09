@@ -1,10 +1,17 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import path from "path";
 import { exampleRoutes } from "./routes/example.routes";
 import { treatmentRoutes } from "./routes/treatment.routes";
 import { exerciseCategoryRoutes } from "./routes/exercise-category.routes";
 import { exerciseRoutes } from "./routes/exercise.routes";
+import { imageRoutes } from "./routes/image.routes";
+import {
+  IMAGE_UPLOAD_DIR_NAME,
+  VIDEO_UPLOAD_DIR_NAME,
+} from "./config/constants";
+import { videoRoutes } from "./routes/video.routes";
 
 require("dotenv").config();
 
@@ -14,11 +21,25 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Image hosting
+app.use(
+  "/img",
+  express.static(path.join(__dirname, `../../uploads/${IMAGE_UPLOAD_DIR_NAME}`))
+);
+
+// Video hosting
+app.use(
+  "/video",
+  express.static(path.join(__dirname, `../../uploads/${VIDEO_UPLOAD_DIR_NAME}`))
+);
+
 // Routes
 app.use("/api/examples", exampleRoutes);
 app.use("/api/treatments", treatmentRoutes);
 app.use("/api/exercise-categories", exerciseCategoryRoutes);
 app.use("/api/exercises", exerciseRoutes);
+app.use("/api/img", imageRoutes);
+app.use("/api/video", videoRoutes);
 
 // Error handling
 app.use(
