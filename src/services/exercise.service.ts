@@ -29,7 +29,9 @@ export const updateExercise = async (
   id: number,
   dto: UpdateExerciseDto
 ): Promise<UpdateResult | null> => {
-  return await exerciseRepository.update(id, dto);
+  const exercise = Exercise.fromDto(dto);
+  console.log(exercise);
+  return await exerciseRepository.update(id, exercise);
 };
 
 export const deleteExercise = async (id: number): Promise<boolean> => {
