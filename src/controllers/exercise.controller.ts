@@ -35,6 +35,7 @@ export const getExerciseById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const exercise = await exerciseService.getExerciseById(id);
+    console.log(exercise);
 
     if (!exercise) {
       handleError(res, new Error("Упражнение не найдено"), 404);

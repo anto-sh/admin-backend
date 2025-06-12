@@ -9,10 +9,13 @@ import { UpdateResult } from "typeorm";
 const exerciseRepository = AppDataSource.getRepository(Exercise);
 
 export const getAllExercises = async (): Promise<Exercise[]> => {
-  return await exerciseRepository.find();
+  return await exerciseRepository.find({ relations: ["category"] });
 };
 export const getExerciseById = async (id: number): Promise<Exercise | null> => {
-  return await exerciseRepository.findOneBy({ id });
+  return await exerciseRepository.findOne({
+    where: { id },
+    relations: ["category"],
+  });
 };
 
 export const createExercise = async (
