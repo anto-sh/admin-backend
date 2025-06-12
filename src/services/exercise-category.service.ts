@@ -9,6 +9,12 @@ import { UpdateResult } from "typeorm";
 const exerciseCategoryRepository =
   AppDataSource.getRepository(ExerciseCategory);
 
+export const getAllExerciseCategories = async (): Promise<
+  ExerciseCategory[]
+> => {
+  return await exerciseCategoryRepository.find();
+};
+
 export const getAllExerciseCategoriesWithExercises = async (): Promise<
   ExerciseCategory[]
 > => {

@@ -1,6 +1,7 @@
 import { RequestHandler, Router } from "express";
 import {
   createExerciseCategory,
+  getAllExerciseCategories,
   getAllExerciseCategoriesWithExercises,
   updateExerciseCategory,
   deleteExerciseCategory,
@@ -8,7 +9,8 @@ import {
 
 const router = Router();
 
-router.get("/", getAllExerciseCategoriesWithExercises as RequestHandler);
+router.get("/", getAllExerciseCategories as RequestHandler);
+router.get("/with-exercises", getAllExerciseCategoriesWithExercises as RequestHandler);
 router.post("/", createExerciseCategory as RequestHandler);
 router.put("/:id", updateExerciseCategory as RequestHandler);
 router.delete("/:id", deleteExerciseCategory as RequestHandler);

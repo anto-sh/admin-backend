@@ -20,6 +20,21 @@ const toResponseDto = (
   exercises: entity.exercises,
 });
 
+export const getAllExerciseCategories = async (req: Request, res: Response) => {
+  try {
+    const exerciseCategories =
+      await exerciseCategoryService.getAllExerciseCategoriesWithExercises();
+    const data = exerciseCategories.map(toResponseDto);
+
+    sendResponse(res, {
+      status: "success",
+      data,
+    });
+  } catch (error) {
+    handleError(res, error as Error);
+  }
+};
+
 export const getAllExerciseCategoriesWithExercises = async (
   req: Request,
   res: Response
