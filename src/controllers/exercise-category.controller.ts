@@ -23,7 +23,7 @@ const toResponseDto = (
 export const getAllExerciseCategories = async (req: Request, res: Response) => {
   try {
     const exerciseCategories =
-      await exerciseCategoryService.getAllExerciseCategoriesWithExercises();
+      await exerciseCategoryService.getAllExerciseCategories();
     const data = exerciseCategories.map(toResponseDto);
 
     sendResponse(res, {
