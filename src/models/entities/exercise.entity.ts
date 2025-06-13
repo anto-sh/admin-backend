@@ -34,7 +34,7 @@ export class Exercise {
   static fromDto(dto: CreateExerciseDto): Exercise {
     const exercise = new Exercise();
     exercise.name = dto.name;
-    exercise.category = new ExerciseCategory(); // Или через сервис
+    exercise.category = new ExerciseCategory();
     exercise.category.id = dto.categoryId || 0;
     exercise.contentJson = dto.contentJson;
     return exercise;

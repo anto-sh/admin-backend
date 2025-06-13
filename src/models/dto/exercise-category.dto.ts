@@ -4,11 +4,11 @@ import { ExerciseResponseDto } from "./exercise.dto";
 export class CreateExerciseCategoryDto {
   @IsNotEmpty()
   @IsString()
-  name?: string;
+  name!: string;
 
   @IsNotEmpty()
   @IsString()
-  url?: string;
+  url!: string;
 }
 
 export class UpdateExerciseCategoryDto {
@@ -21,7 +21,7 @@ export class UpdateExerciseCategoryDto {
 
 export interface ExerciseCategoryResponseDto {
   id: number;
-  name?: string;
-  url?: string;
+  name: string;
+  url: string;
   exercises?: ExerciseResponseDto[];
 }

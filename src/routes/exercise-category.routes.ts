@@ -10,7 +10,10 @@ import {
 const router = Router();
 
 router.get("/", getAllExerciseCategories as RequestHandler);
-router.get("/with-exercises", getAllExerciseCategoriesWithExercises as RequestHandler);
+router.get(
+  "/with-exercises",
+  getAllExerciseCategoriesWithExercises as RequestHandler
+);
 router.post("/", createExerciseCategory as RequestHandler);
 router.put("/:id", updateExerciseCategory as RequestHandler);
 router.delete("/:id", deleteExerciseCategory as RequestHandler);

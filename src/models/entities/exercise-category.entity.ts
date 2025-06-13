@@ -10,10 +10,10 @@ export class ExerciseCategory {
   id!: number;
 
   @Column()
-  name?: string;
+  name!: string;
 
   @Column()
-  url?: string;
+  url!: string;
 
   @OneToMany(() => Exercise, (exercise) => exercise.category)
   exercises?: Exercise[];
