@@ -17,6 +17,7 @@ import { serviceCategoryRoutes } from "./routes/service-category.routes";
 import { serviceRoutes } from "./routes/service.routes";
 import { expertCategoryRoutes } from "./routes/expert-category.routes";
 import { expertRoutes } from "./routes/expert.routes";
+import { priceRoutes } from "./routes/price.routes";
 
 require("dotenv").config();
 
@@ -31,7 +32,6 @@ app.use(
   "/img",
   express.static(path.join(__dirname, `../../uploads/${IMAGE_UPLOAD_DIR_NAME}`))
 );
-
 // Video hosting
 app.use(
   "/video",
@@ -49,6 +49,7 @@ app.use("/api/service-categories", serviceCategoryRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/expert-categories", expertCategoryRoutes);
 app.use("/api/experts", expertRoutes);
+app.use("/api/prices", priceRoutes);
 
 // Error handling
 app.use(

@@ -8,6 +8,7 @@ import { Service } from "../models/entities/service.entity";
 import { ServiceCategory } from "../models/entities/service-category.entity";
 import { Expert } from "../models/entities/expert.entity";
 import { ExpertCategory } from "../models/entities/expert-category.entity";
+import { Price } from "../models/entities/price.entity";
 
 export const AppDataSource = new DataSource({
   type: "better-sqlite3",
@@ -24,5 +25,6 @@ export const AppDataSource = new DataSource({
     ServiceCategory,
     Expert,
     ExpertCategory,
+    Price,
   ],
 });
