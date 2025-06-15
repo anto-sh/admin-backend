@@ -4,10 +4,7 @@ import { IMAGE_UPLOAD_DIR_NAME } from "./constants";
 
 const storage: StorageEngine = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(
-      null,
-      path.join(__dirname, `../../../uploads/${IMAGE_UPLOAD_DIR_NAME}`)
-    );
+    cb(null, path.join(__dirname, `../../../uploads/${IMAGE_UPLOAD_DIR_NAME}`));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -16,6 +13,6 @@ const storage: StorageEngine = multer.diskStorage({
   },
 });
 
-const uploadImage = multer({ storage });
+const uploadImage = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
 
 export default uploadImage;
