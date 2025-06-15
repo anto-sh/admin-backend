@@ -15,6 +15,8 @@ import { imageRoutes } from "./routes/image.routes";
 import { videoRoutes } from "./routes/video.routes";
 import { serviceCategoryRoutes } from "./routes/service-category.routes";
 import { serviceRoutes } from "./routes/service.routes";
+import { expertCategoryRoutes } from "./routes/expert-category.routes";
+import { expertRoutes } from "./routes/expert.routes";
 
 require("dotenv").config();
 
@@ -45,6 +47,8 @@ app.use("/api/img", imageRoutes);
 app.use("/api/video", videoRoutes);
 app.use("/api/service-categories", serviceCategoryRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/expert-categories", expertCategoryRoutes);
+app.use("/api/experts", expertRoutes);
 
 // Error handling
 app.use(
