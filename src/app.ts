@@ -7,7 +7,6 @@ import {
   VIDEO_UPLOAD_DIR_NAME,
 } from "./config/constants";
 //routes
-import { exampleRoutes } from "./routes/example.routes";
 import { treatmentRoutes } from "./routes/treatment.routes";
 import { exerciseCategoryRoutes } from "./routes/exercise-category.routes";
 import { exerciseRoutes } from "./routes/exercise.routes";
@@ -19,27 +18,30 @@ import { expertCategoryRoutes } from "./routes/expert-category.routes";
 import { expertRoutes } from "./routes/expert.routes";
 import { priceRoutes } from "./routes/price.routes";
 
-require("dotenv").config();
-
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
+const staticBasePath =
+  process.env.NODE_ENV === "production"
+    ? path.join(__dirname, "..", "uploads")
+    : path.join(__dirname, "..", "..", "uploads");
+
 // Image hosting
 app.use(
   "/img",
-  express.static(path.join(__dirname, `../../uploads/${IMAGE_UPLOAD_DIR_NAME}`))
+  express.static(path.join(staticBasePath, IMAGE_UPLOAD_DIR_NAME))
 );
+
 // Video hosting
 app.use(
   "/video",
-  express.static(path.join(__dirname, `../../uploads/${VIDEO_UPLOAD_DIR_NAME}`))
+  express.static(path.join(staticBasePath, VIDEO_UPLOAD_DIR_NAME))
 );
 
 // Routes
-app.use("/api/examples", exampleRoutes);
 app.use("/api/treatments", treatmentRoutes);
 app.use("/api/exercise-categories", exerciseCategoryRoutes);
 app.use("/api/exercises", exerciseRoutes);

@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import { AppDataSource } from "./config/database.config";
 import app from "./app";
 import { PORT } from "./config/constants";
@@ -11,4 +13,5 @@ AppDataSource.initialize()
   })
   .catch((err: any) => {
     console.error("Database connection error", err);
+    process.exit(1);
   });
