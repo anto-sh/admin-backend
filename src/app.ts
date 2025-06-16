@@ -35,10 +35,7 @@ app.get(/^\/(?!api|img|video).*/, (req, res) => {
   res.sendFile(path.join(frontPath, "index.html"));
 });
 
-const staticBasePath =
-  process.env.NODE_ENV === "production"
-    ? path.join(__dirname, "..", "uploads")
-    : path.join(__dirname, "..", "..", "uploads");
+const staticBasePath = path.join(__dirname, "..", "..", "uploads");
 
 const imageDir = path.join(staticBasePath, IMAGE_UPLOAD_DIR_NAME);
 const videoDir = path.join(staticBasePath, VIDEO_UPLOAD_DIR_NAME);

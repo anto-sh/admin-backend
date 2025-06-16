@@ -4,7 +4,6 @@ import {
   IsInt,
   IsNotEmpty,
   IsString,
-  IsUrl,
 } from "class-validator";
 
 export class CreateServiceDto {
@@ -13,9 +12,7 @@ export class CreateServiceDto {
   name!: string;
 
   @IsNotEmpty()
-  @IsUrl({
-    require_tld: false, // не требовать домен верхнего уровня
-  })
+  @IsString()
   imageUrl!: string;
 
   @IsNotEmpty()
@@ -36,9 +33,7 @@ export class UpdateServiceDto {
   @IsString()
   name!: string;
 
-  @IsUrl({
-    require_tld: false, // не требовать домен верхнего уровня
-  })
+  @IsString()
   imageUrl!: string;
 
   @IsInt()

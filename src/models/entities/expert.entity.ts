@@ -8,7 +8,6 @@ import {
 import {
   IsNotEmpty,
   IsString,
-  IsUrl,
   IsObject,
   ValidateNested,
 } from "class-validator";
@@ -33,9 +32,7 @@ export class Expert {
 
   @Column({ name: "image_url" })
   @IsNotEmpty()
-  @IsUrl({
-    require_tld: false,
-  })
+  @IsString()
   imageUrl?: string;
 
   @Column({ name: "content_json", type: "json" })

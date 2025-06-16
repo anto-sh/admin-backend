@@ -8,7 +8,6 @@ import {
 import {
   IsNotEmpty,
   IsString,
-  IsUrl,
   IsArray,
   ArrayNotEmpty,
   IsInt,
@@ -30,9 +29,7 @@ export class Service {
 
   @Column({ name: "image_url" })
   @IsNotEmpty()
-  @IsUrl({
-    require_tld: false, // не требовать домен верхнего уровня
-  })
+  @IsString()
   imageUrl!: string;
 
   @Column("decimal", { precision: 10, scale: 2 })

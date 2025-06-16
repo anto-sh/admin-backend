@@ -3,7 +3,6 @@ import {
   IsString,
   IsNumber,
   IsObject,
-  IsUrl,
 } from "class-validator";
 
 export class CreateExpertDto {
@@ -16,7 +15,7 @@ export class CreateExpertDto {
   description?: string;
 
   @IsNotEmpty()
-  @IsUrl({ require_tld: false })
+  @IsString()
   imageUrl?: string;
 
   @IsNotEmpty()
@@ -35,7 +34,7 @@ export class UpdateExpertDto {
   @IsString()
   description?: string;
 
-  @IsUrl({ require_tld: false })
+  @IsString()
   imageUrl?: string;
 
   @IsNumber()
