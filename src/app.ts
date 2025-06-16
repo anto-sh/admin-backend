@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
+import fs from "fs";
 import {
   IMAGE_UPLOAD_DIR_NAME,
   VIDEO_UPLOAD_DIR_NAME,
@@ -20,28 +21,44 @@ import { priceRoutes } from "./routes/price.routes";
 
 const app = express();
 
-// Middleware
+// middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// frontend static path
+const frontPath = path.join(__dirname, "..", "..", "admin-frontend/dist");
+// frontend static
+app.use(express.static(frontPath));
+
+// SPA history mode
+app.get(/^\/(?!api|img|video).*/, (req, res) => {
+  res.sendFile(path.join(frontPath, "index.html"));
+});
 
 const staticBasePath =
   process.env.NODE_ENV === "production"
     ? path.join(__dirname, "..", "uploads")
     : path.join(__dirname, "..", "..", "uploads");
 
-// Image hosting
-app.use(
-  "/img",
-  express.static(path.join(staticBasePath, IMAGE_UPLOAD_DIR_NAME))
-);
+const imageDir = path.join(staticBasePath, IMAGE_UPLOAD_DIR_NAME);
+const videoDir = path.join(staticBasePath, VIDEO_UPLOAD_DIR_NAME);
 
-// Video hosting
-app.use(
-  "/video",
-  express.static(path.join(staticBasePath, VIDEO_UPLOAD_DIR_NAME))
-);
+// if upload dirs doesn't exist, create it
+if (!fs.existsSync(imageDir)) {
+  fs.mkdirSync(imageDir, { recursive: true });
+}
+if (!fs.existsSync(videoDir)) {
+  fs.mkdirSync(videoDir, { recursive: true });
+}
 
-// Routes
+// image hosting
+app.use("/img", express.static(imageDir));
+console.log("Image path:", imageDir);
+// video hosting
+app.use("/video", express.static(videoDir));
+console.log("Video path:", videoDir);
+
+// routes
 app.use("/api/treatments", treatmentRoutes);
 app.use("/api/exercise-categories", exerciseCategoryRoutes);
 app.use("/api/exercises", exerciseRoutes);
@@ -53,7 +70,7 @@ app.use("/api/expert-categories", expertCategoryRoutes);
 app.use("/api/experts", expertRoutes);
 app.use("/api/prices", priceRoutes);
 
-// Error handling
+// error handling
 app.use(
   (
     err: Error,
