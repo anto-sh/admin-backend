@@ -1,0 +1,61 @@
+name: Deploy Admin Backend
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.json'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11
+
+      - name: Install dependencies (for build)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build TypeScript
+        run: pnpm build
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - name: Deploy files to server
+        run: |
+          # Копируем dist
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./dist/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user/rehab-amplituda/admin-backend/dist/
+
+          # Копируем package.json и lock-файл
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./package.json \
+            ./pnpm-lock.yaml \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user/rehab-amplituda/admin-backend/
+
+      - name: Install production dependencies on server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
+            "cd /home/user/rehab-amplituda/admin-backend && pnpm install --production --frozen-lockfile"
