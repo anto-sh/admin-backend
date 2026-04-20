@@ -8,7 +8,6 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - 'tsconfig.json'
 
 jobs:
   build-and-deploy:
