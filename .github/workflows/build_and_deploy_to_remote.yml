@@ -43,16 +43,16 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key" \
             ./dist/ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user/rehab-amplituda/admin-backend/dist/
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.SERVER_PROJECT_DIR }}/dist/
 
           # Копируем package.json и lock-файл
           rsync -avz \
             -e "ssh -i ~/.ssh/deploy_key" \
             ./package.json \
             ./pnpm-lock.yaml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user/rehab-amplituda/admin-backend/
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.SERVER_PROJECT_DIR }}/
 
       - name: Install production dependencies on server
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
-            "cd /home/user/rehab-amplituda/admin-backend && pnpm install --production --frozen-lockfile"
+            "cd ${{ secrets.SERVER_PROJECT_DIR }} && pnpm install --production --frozen-lockfile"
