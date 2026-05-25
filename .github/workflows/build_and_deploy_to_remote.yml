@@ -56,3 +56,8 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
             "cd ${{ secrets.SERVER_PROJECT_DIR }} && pnpm install --production --frozen-lockfile"
+          
+      - name: Restart admin panel
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
+           "/home/${{ secrets.SSH_USER }}/bin/restart-admin"
