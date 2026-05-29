@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/", getAllExerciseCategories as RequestHandler);
 router.get(
-  "/with-exercises",
+  "/with-entities",
   getAllExerciseCategoriesWithExercises as RequestHandler
 );
 router.post("/", createExerciseCategory as RequestHandler);
