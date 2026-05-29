@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import path from "path";
 import imageService from "../services/image.service";
+import { sendResponse } from "../utils/api-response";
+import { handleError } from "../utils/error-handler";
 
 // Типизация Multer file
 export interface MulterFile {
@@ -19,25 +21,27 @@ class ImageController {
   async upload(req: Request, res: Response): Promise<void> {
     try {
       const file = req.file as MulterFile | undefined;
+
       if (!file) {
         res.status(400).json({ success: 0, error: "Нет файла" });
         return;
       }
 
       const url = imageService.getImageUrl(req, file.filename);
+      const data = {
+        url,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        extension: path.extname(file.originalname).replace(".", ""),
+      };
 
-      res.json({
-        success: 1,
-        file: {
-          url,
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          size: file.size,
-          extension: path.extname(file.originalname).replace(".", ""),
-        },
+      sendResponse(res, {
+        status: "success",
+        data,
       });
     } catch (error) {
-      res.status(500).json({ success: 0, error: "Internal server error" });
+      handleError(res, error as Error);
     }
   }
 }
