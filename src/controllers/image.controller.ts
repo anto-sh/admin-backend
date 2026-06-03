@@ -17,33 +17,29 @@ export interface MulterFile {
   buffer?: Buffer;
 }
 
-class ImageController {
-  async upload(req: Request, res: Response): Promise<void> {
-    try {
-      const file = req.file as MulterFile | undefined;
+export const upload = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const file = req.file as MulterFile | undefined;
 
-      if (!file) {
-        res.status(400).json({ success: 0, error: "Нет файла" });
-        return;
-      }
-
-      const url = imageService.getImageUrl(req, file.filename);
-      const data = {
-        url,
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        extension: path.extname(file.originalname).replace(".", ""),
-      };
-
-      sendResponse(res, {
-        status: "success",
-        data,
-      });
-    } catch (error) {
-      handleError(res, error as Error);
+    if (!file) {
+      res.status(400).json({ success: 0, error: "Нет файла" });
+      return;
     }
-  }
-}
 
-export default new ImageController();
+    const url = imageService.getImageUrl(req, file.filename);
+    const data = {
+      url,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      extension: path.extname(file.originalname).replace(".", ""),
+    };
+
+    sendResponse(res, {
+      status: "success",
+      data,
+    });
+  } catch (error) {
+    handleError(res, error as Error);
+  }
+};
