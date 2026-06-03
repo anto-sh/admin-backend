@@ -1,22 +1,17 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsNumber,
-  IsInt,
-} from "class-validator";
+import { IsNotEmpty, IsString, IsNumber, IsInt } from "class-validator";
 
 export class CreatePriceDto {
   @IsNotEmpty()
   @IsString()
   name!: string;
 
-  @IsNotEmpty()
   @IsInt()
   price!: number;
 }
 
 export class UpdatePriceDto {
   @IsString()
+  @IsNotEmpty()
   name?: string;
 
   @IsInt()
@@ -28,6 +23,7 @@ export class UpdatePriceBatchDto {
   id!: number;
 
   @IsString()
+  @IsNotEmpty()
   name?: string;
 
   @IsInt()
