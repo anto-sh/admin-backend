@@ -11,6 +11,7 @@ import { plainToClass, plainToInstance } from "class-transformer";
 import { sendResponse } from "../utils/api-response";
 import { handleError } from "../utils/error-handler";
 import { Price } from "../models/entities/price.entity";
+import { ERROR_CODES } from "../config/constants";
 
 const toResponseDto = (entity: Price): PriceResponseDto => ({
   id: entity.id,
@@ -56,7 +57,7 @@ export const createPrice = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
       return;
     }
 
@@ -79,7 +80,7 @@ export const updatePrice = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
       return;
     }
 
@@ -104,7 +105,7 @@ export const updatePriceBatch = async (req: Request, res: Response) => {
     const flatErrors = errors.flat();
 
     if (flatErrors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, {
+      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, {
         errors: flatErrors,
       });
       return;

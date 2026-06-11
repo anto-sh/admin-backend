@@ -11,6 +11,7 @@ import { validate } from "class-validator";
 import { plainToClass, plainToInstance } from "class-transformer";
 import { sendResponse } from "../utils/api-response";
 import { handleError } from "../utils/error-handler";
+import { ERROR_CODES } from "../config/constants";
 
 const toResponseDto = (entity: Treatment): TreatmentResponseDto => ({
   id: entity.id,
@@ -23,7 +24,12 @@ export const createTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      handleError(
+        res,
+        new Error("Ошибки валидации"),
+        ERROR_CODES.VALIDATION_ERROR,
+        { errors },
+      );
       return;
     }
 
@@ -60,7 +66,12 @@ export const updateTreatment = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      handleError(
+        res,
+        new Error("Ошибки валидации"),
+        ERROR_CODES.VALIDATION_ERROR,
+        { errors },
+      );
       return;
     }
 
@@ -84,13 +95,18 @@ export const updateTreatmentBatch = async (req: Request, res: Response) => {
   try {
     const dtoArr = plainToInstance(
       UpdateTreatmentBatchDto,
-      req.body as UpdateTreatmentBatchDto[]
+      req.body as UpdateTreatmentBatchDto[],
     );
 
     const errors = await Promise.all(dtoArr.map((dto) => validate(dto)));
 
     if (errors.flat().length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
+      handleError(
+        res,
+        new Error("Ошибки валидации"),
+        ERROR_CODES.VALIDATION_ERROR,
+        { errors },
+      );
       return;
     }
 

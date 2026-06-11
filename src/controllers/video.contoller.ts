@@ -9,7 +9,7 @@ export const upload = async (req: Request, res: Response): Promise<void> => {
     const file = req.file as Express.Multer.File | undefined;
 
     if (!file) {
-      res.status(400).json({ success: 0, error: "Нет файла" });
+      handleError(res, new Error("Нет файла!"), 400);
       return;
     }
 
