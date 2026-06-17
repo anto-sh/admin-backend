@@ -81,7 +81,9 @@ export const createExerciseCategory = async (req: Request, res: Response) => {
         params: {
           name: data.name,
           url: data.url,
-        },
+        } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.CREATED
+        >,
       },
       data,
     });
@@ -97,13 +99,16 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
     const validationErrors = await validate(dto);
 
     if (validationErrors.length > 0) {
-      throw new NetworkError({
-        statusCode: ERROR_CODES.VALIDATION,
-        networkMessage: {
-          code: NMC.COMMON_ERRORS.VALIDATION,
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
         },
-        data: { validationErrors },
-      });
+        "Ошибки валидации",
+      );
     }
 
     const updateResult = await exerciseCategoryService.updateExerciseCategory(
@@ -116,10 +121,10 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
         {
           statusCode: ERROR_CODES.NOT_FOUND,
           networkMessage: {
-            code: NMC.EXERCISE_CATEGORY.ERROR.NOT_FOUND,
-            params: {
-              id,
-            },
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
           },
         },
         `Категория № ${id} не найдена`,
@@ -129,7 +134,6 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
     sendResponse(res, {
       message: {
         code: NMC.EXERCISE_CATEGORY.UPDATED,
-        //TODO: Делать ли так? Или придумать другой способ?
         params: { id } satisfies NetworkMessageParamsFor<
           typeof NMC.EXERCISE_CATEGORY.UPDATED
         >,
@@ -150,10 +154,10 @@ export const deleteExerciseCategory = async (req: Request, res: Response) => {
         {
           statusCode: ERROR_CODES.NOT_FOUND,
           networkMessage: {
-            code: NMC.EXERCISE_CATEGORY.ERROR.NOT_FOUND,
-            params: {
-              id,
-            },
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
           },
         },
         `Категория № ${id} не найдена`,
@@ -163,9 +167,9 @@ export const deleteExerciseCategory = async (req: Request, res: Response) => {
     sendResponse(res, {
       message: {
         code: NMC.EXERCISE_CATEGORY.DELETED,
-        params: {
-          id,
-        },
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.DELETED
+        >,
       },
     });
   } catch (error) {

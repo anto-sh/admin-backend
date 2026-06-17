@@ -5,33 +5,28 @@ import { UpdateResult } from "typeorm";
 
 const serviceRepository = AppDataSource.getRepository(Service);
 
-export const getAllServices = async (): Promise<Service[]> => {
-  return await serviceRepository.find({ relations: ["category"] });
+export const getAllServices = () => {
+  return serviceRepository.find({ relations: ["category"] });
 };
 
-export const getServiceById = async (id: number): Promise<Service | null> => {
-  return await serviceRepository.findOne({
+export const getServiceById = (id: number) => {
+  return serviceRepository.findOne({
     where: { id },
     relations: ["category"],
   });
 };
 
-export const createService = async (
-  dto: CreateServiceDto
-): Promise<Service> => {
+export const createService = (dto: CreateServiceDto) => {
   const service = Service.fromDto(dto);
-  return await serviceRepository.save(service);
+  return serviceRepository.save(service);
 };
 
-export const updateService = async (
-  id: number,
-  dto: UpdateServiceDto
-): Promise<UpdateResult | null> => {
+export const updateService = (id: number, dto: UpdateServiceDto) => {
   const service = Service.fromDto(dto);
-  return await serviceRepository.update(id, service);
+  return serviceRepository.update(id, service);
 };
 
-export const deleteService = async (id: number): Promise<boolean> => {
+export const deleteService = async (id: number) => {
   const result = await serviceRepository.delete(id);
   return result.affected !== 0;
 };

@@ -7,6 +7,7 @@ import {
 import { NetworkError } from "../shared/class/network-error";
 import { ERROR_CODES } from "../config/constants";
 import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NetworkMessageParamsFor } from "../config/network-message-params";
 
 const exerciseCategoryRepository =
   AppDataSource.getRepository(ExerciseCategory);
@@ -36,7 +37,9 @@ export const createExerciseCategory = async (
           code: NMC.EXERCISE_CATEGORY.ERROR.DUPLICATE_NAME,
           params: {
             name: dto.name,
-          },
+          } satisfies NetworkMessageParamsFor<
+            typeof NMC.EXERCISE_CATEGORY.ERROR.DUPLICATE_NAME
+          >,
         },
       },
       "Категория с таким названием уже существует",
@@ -54,8 +57,10 @@ export const createExerciseCategory = async (
         networkMessage: {
           code: NMC.EXERCISE_CATEGORY.ERROR.DUPLICATE_URL,
           params: {
-            name: dto.url,
-          },
+            url: dto.url,
+          } satisfies NetworkMessageParamsFor<
+            typeof NMC.EXERCISE_CATEGORY.ERROR.DUPLICATE_URL
+          >,
         },
       },
       "Категория с таким url уже существует",

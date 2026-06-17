@@ -10,7 +10,10 @@ import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
 import { sendResponse } from "../utils/send-response";
 import { handleError } from "../utils/handle-error";
-import { ERROR_CODES } from "../config/constants";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NetworkMessageParamsFor } from "../config/network-message-params";
 
 const toResponseDto = (entity: Expert): ExpertResponseDto => ({
   id: entity.id,
@@ -26,11 +29,10 @@ export const getAllExperts = async (req: Request, res: Response) => {
     const experts = await expertService.getAllExperts();
     const data = experts.map(toResponseDto);
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
@@ -40,41 +42,64 @@ export const getExpertById = async (req: Request, res: Response) => {
     const expert = await expertService.getExpertById(id);
 
     if (!expert) {
-      handleError(res, new Error("Специалист не найден"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: {
+              id,
+            } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Специалист № ${id} не найден`,
+      );
     }
 
     const data = toResponseDto(expert);
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const createExpert = async (req: Request, res: Response) => {
   try {
     const dto = plainToClass(CreateExpertDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
+        },
+        "Ошибки валидации",
+      );
     }
 
     const expert = await expertService.createExpert(dto);
     const data = toResponseDto(expert);
 
     sendResponse(res, {
-      status: "success",
-      code: 201,
-      message: "Новый специалист успешно добавлен",
+      statusCode: SUCCESS_CODES.CREATED,
+      message: {
+        code: NMC.EXPERT.CREATED,
+        params: {
+          name: data.fullName || "Без имени",
+        } satisfies NetworkMessageParamsFor<typeof NMC.EXPERT.CREATED>,
+      },
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
@@ -82,26 +107,51 @@ export const updateExpert = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const dto = plainToClass(UpdateExpertDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
+        },
+        "Ошибки валидации",
+      );
     }
 
     const updateResult = await expertService.updateExpert(id, dto);
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Специалист не найден"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: {
+              id,
+            } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Специалист № ${id} не найден`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: `Специалист № ${id} успешно обновлен`,
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.EXPERT.UPDATED,
+        params: {
+          id,
+        } satisfies NetworkMessageParamsFor<typeof NMC.EXPERT.UPDATED>,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
@@ -111,15 +161,32 @@ export const deleteExpert = async (req: Request, res: Response) => {
     const success = await expertService.deleteExpert(id);
 
     if (!success) {
-      handleError(res, new Error("Специалист не найден"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: {
+              id,
+            } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Специалист № ${id} не найден`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: "Специалист успешно удален",
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.EXPERT.DELETED,
+        params: {
+          id,
+        } satisfies NetworkMessageParamsFor<typeof NMC.EXPERT.DELETED>,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };

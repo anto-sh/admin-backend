@@ -3,6 +3,7 @@ export const IMAGE_UPLOAD_DIR_NAME = "img";
 export const VIDEO_UPLOAD_DIR_NAME = "video";
 
 export enum ERROR_CODES {
+  BAD_REQUEST = 400,
   NOT_FOUND = 404,
   CONFLICT = 409,
   VALIDATION = 422,

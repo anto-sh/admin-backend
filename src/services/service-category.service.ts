@@ -4,18 +4,19 @@ import {
   CreateServiceCategoryDto,
   UpdateServiceCategoryDto,
 } from "../models/dto/service-category.dto";
-import { UpdateResult } from "typeorm";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { ERROR_CODES } from "../config/constants";
+import { NetworkMessageParamsFor } from "../config/network-message-params";
 
 const serviceCategoryRepository = AppDataSource.getRepository(ServiceCategory);
 
-export const getAllServiceCategories = async (): Promise<ServiceCategory[]> => {
-  return await serviceCategoryRepository.find();
+export const getAllServiceCategories = () => {
+  return serviceCategoryRepository.find();
 };
 
-export const getAllServiceCategoriesWithServices = async (): Promise<
-  ServiceCategory[]
-> => {
-  return await serviceCategoryRepository.find({ relations: ["services"] });
+export const getAllServiceCategoriesWithServices = () => {
+  return serviceCategoryRepository.find({ relations: ["services"] });
 };
 
 export const createServiceCategory = async (
@@ -26,9 +27,20 @@ export const createServiceCategory = async (
     name: dto.name,
   });
   if (nameExists) {
-    throw new Error("Категория с таким названием уже существует", {
-      cause: 409,
-    });
+    throw new NetworkError(
+      {
+        statusCode: ERROR_CODES.CONFLICT,
+        networkMessage: {
+          code: NMC.SERVICE_CATEGORY.ERROR.DUPLICATE_NAME,
+          params: {
+            name: dto.name,
+          } satisfies NetworkMessageParamsFor<
+            typeof NMC.SERVICE_CATEGORY.ERROR.DUPLICATE_NAME
+          >,
+        },
+      },
+      "Категория с таким названием уже существует",
+    );
   }
 
   // Проверка уникальности url
@@ -36,49 +48,34 @@ export const createServiceCategory = async (
     url: dto.url,
   });
   if (urlExists) {
-    throw new Error("Категория с таким url уже существует", { cause: 409 });
+    throw new NetworkError(
+      {
+        statusCode: ERROR_CODES.CONFLICT,
+        networkMessage: {
+          code: NMC.SERVICE_CATEGORY.ERROR.DUPLICATE_URL,
+          params: {
+            url: dto.url,
+          } satisfies NetworkMessageParamsFor<
+            typeof NMC.SERVICE_CATEGORY.ERROR.DUPLICATE_URL
+          >,
+        },
+      },
+      "Категория с таким url уже существует",
+    );
   }
 
   const category = ServiceCategory.fromDto(dto);
   return await serviceCategoryRepository.save(category);
 };
 
-export const updateServiceCategory = async (
+export const updateServiceCategory = (
   id: number,
   dto: UpdateServiceCategoryDto,
-): Promise<UpdateResult | null> => {
-  // Проверка уникальности name (если передан)
-  if (dto.name) {
-    const nameExists = await serviceCategoryRepository
-      .createQueryBuilder("category")
-      .where("category.name = :name", { name: dto.name })
-      .andWhere("category.id != :id", { id })
-      .getOne();
-    if (nameExists) {
-      // TODO: Почему в апдейте такая ошибка вообще возможна?
-      throw new Error("Категория с таким именем уже существует", {
-        cause: 409,
-      });
-    }
-  }
-
-  // Проверка уникальности url (если передан)
-  if (dto.url) {
-    const urlExists = await serviceCategoryRepository
-      .createQueryBuilder("category")
-      .where("category.url = :url", { url: dto.url })
-      .andWhere("category.id != :id", { id })
-      .getOne();
-    if (urlExists) {
-      // TODO: Почему в апдейте такая ошибка вообще возможна?
-      throw new Error("Категория с таким url уже существует", { cause: 409 });
-    }
-  }
-
-  return await serviceCategoryRepository.update(id, dto);
+) => {
+  return serviceCategoryRepository.update(id, dto);
 };
 
-export const deleteServiceCategory = async (id: number): Promise<boolean> => {
+export const deleteServiceCategory = async (id: number) => {
   const result = await serviceCategoryRepository.delete(id);
   return result.affected !== 0;
 };

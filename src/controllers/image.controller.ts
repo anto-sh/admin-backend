@@ -3,6 +3,9 @@ import path from "path";
 import imageService from "../services/image.service";
 import { sendResponse } from "../utils/send-response";
 import { handleError } from "../utils/handle-error";
+import { NetworkError } from "../shared/class/network-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
 
 // Типизация Multer file
 export interface MulterFile {
@@ -22,8 +25,15 @@ export const upload = async (req: Request, res: Response): Promise<void> => {
     const file = req.file as MulterFile | undefined;
 
     if (!file) {
-      handleError(res, new Error("Нет файла!"), 400);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.BAD_REQUEST,
+          networkMessage: {
+            code: NMC.IMAGE.ERROR.N0_FILE,
+          },
+        },
+        "Нет файла!",
+      );
     }
 
     const url = imageService.getImageUrl(req, file.filename);
@@ -36,10 +46,13 @@ export const upload = async (req: Request, res: Response): Promise<void> => {
     };
 
     sendResponse(res, {
-      status: "success",
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.IMAGE.UPLOADED,
+      },
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };

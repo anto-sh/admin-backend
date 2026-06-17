@@ -5,34 +5,31 @@ import { UpdateResult } from "typeorm";
 
 const expertRepository = AppDataSource.getRepository(Expert);
 
-export const getAllExperts = async (): Promise<Expert[]> => {
-  return await expertRepository.find({
+export const getAllExperts = () => {
+  return expertRepository.find({
     relations: ["category"],
     order: { id: "ASC" },
   });
 };
 
-export const getExpertById = async (id: number): Promise<Expert | null> => {
-  return await expertRepository.findOne({
+export const getExpertById = (id: number) => {
+  return expertRepository.findOne({
     where: { id },
     relations: ["category"],
   });
 };
 
-export const createExpert = async (dto: CreateExpertDto): Promise<Expert> => {
+export const createExpert = (dto: CreateExpertDto) => {
   const expert = Expert.fromDto(dto);
-  return await expertRepository.save(expert);
+  return expertRepository.save(expert);
 };
 
-export const updateExpert = async (
-  id: number,
-  dto: UpdateExpertDto
-): Promise<UpdateResult | null> => {
+export const updateExpert = (id: number, dto: UpdateExpertDto) => {
   const expert = Expert.fromDto(dto);
-  return await expertRepository.update(id, expert);
+  return expertRepository.update(id, expert);
 };
 
-export const deleteExpert = async (id: number): Promise<boolean> => {
+export const deleteExpert = async (id: number) => {
   const result = await expertRepository.delete(id);
   return result.affected !== 0;
 };
