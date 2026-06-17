@@ -8,12 +8,15 @@ import {
 import { ExerciseCategory } from "../models/entities/exercise-category.entity";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
-import { ERROR_CODES } from "../config/constants";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NetworkMessageParamsFor } from "../config/network-message-params";
 
 const toResponseDto = (
-  entity: ExerciseCategory
+  entity: ExerciseCategory,
 ): ExerciseCategoryResponseDto => ({
   id: entity.id,
   name: entity.name,
@@ -28,17 +31,16 @@ export const getAllExerciseCategories = async (req: Request, res: Response) => {
     const data = exerciseCategories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const getAllExerciseCategoriesWithExercises = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const exerciseCategories =
@@ -46,36 +48,45 @@ export const getAllExerciseCategoriesWithExercises = async (
     const data = exerciseCategories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const createExerciseCategory = async (req: Request, res: Response) => {
   try {
     const dto = plainToClass(CreateExerciseCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError({
+        statusCode: ERROR_CODES.VALIDATION,
+        networkMessage: {
+          code: NMC.COMMON_ERRORS.VALIDATION,
+        },
+        data: { validationErrors },
+      });
     }
 
     const exerciseCategory =
       await exerciseCategoryService.createExerciseCategory(dto);
     const data = toResponseDto(exerciseCategory);
+
     sendResponse(res, {
-      status: "success",
-      code: 201,
-      message: "Новая категория успешно добавлена",
+      statusCode: SUCCESS_CODES.CREATED,
+      message: {
+        code: NMC.EXERCISE_CATEGORY.CREATED,
+        params: {
+          name: data.name,
+          url: data.url,
+        },
+      },
       data,
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
@@ -83,30 +94,49 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const dto = plainToClass(UpdateExerciseCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError({
+        statusCode: ERROR_CODES.VALIDATION,
+        networkMessage: {
+          code: NMC.COMMON_ERRORS.VALIDATION,
+        },
+        data: { validationErrors },
+      });
     }
 
     const updateResult = await exerciseCategoryService.updateExerciseCategory(
       id,
-      dto
+      dto,
     );
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.EXERCISE_CATEGORY.ERROR.NOT_FOUND,
+            params: {
+              id,
+            },
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: `Категория № ${id} успешно обновлена`,
+      message: {
+        code: NMC.EXERCISE_CATEGORY.UPDATED,
+        //TODO: Делать ли так? Или придумать другой способ?
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.UPDATED
+        >,
+      },
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
@@ -116,15 +146,29 @@ export const deleteExerciseCategory = async (req: Request, res: Response) => {
     const success = await exerciseCategoryService.deleteExerciseCategory(id);
 
     if (!success) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.EXERCISE_CATEGORY.ERROR.NOT_FOUND,
+            params: {
+              id,
+            },
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: "Категория успешно удалена",
+      message: {
+        code: NMC.EXERCISE_CATEGORY.DELETED,
+        params: {
+          id,
+        },
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
