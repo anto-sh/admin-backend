@@ -2,6 +2,14 @@ export const PORT = process.env.PORT || 3001;
 export const IMAGE_UPLOAD_DIR_NAME = "img";
 export const VIDEO_UPLOAD_DIR_NAME = "video";
 
-export const ERROR_CODES = {
-  VALIDATION_ERROR: 422,
-} as const;
+export enum ERROR_CODES {
+  NOT_FOUND = 404,
+  CONFLICT = 409,
+  VALIDATION = 422,
+  INTERNAL_SERVER = 500,
+}
+
+export enum SUCCESS_CODES {
+  OK = 200,
+  CREATED = 201,
+}
