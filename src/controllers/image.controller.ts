@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import path from "path";
 import imageService from "../services/image.service";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
 
 // Типизация Multer file
 export interface MulterFile {

@@ -9,8 +9,8 @@ import {
 import { Treatment } from "../models/entities/treatment.entity";
 import { validate } from "class-validator";
 import { plainToClass, plainToInstance } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
 import { ERROR_CODES } from "../config/constants";
 
 const toResponseDto = (entity: Treatment): TreatmentResponseDto => ({
@@ -27,7 +27,7 @@ export const createTreatment = async (req: Request, res: Response) => {
       handleError(
         res,
         new Error("Ошибки валидации"),
-        ERROR_CODES.VALIDATION_ERROR,
+        ERROR_CODES.VALIDATION,
         { errors },
       );
       return;
@@ -69,7 +69,7 @@ export const updateTreatment = async (req: Request, res: Response) => {
       handleError(
         res,
         new Error("Ошибки валидации"),
-        ERROR_CODES.VALIDATION_ERROR,
+        ERROR_CODES.VALIDATION,
         { errors },
       );
       return;
@@ -104,7 +104,7 @@ export const updateTreatmentBatch = async (req: Request, res: Response) => {
       handleError(
         res,
         new Error("Ошибки валидации"),
-        ERROR_CODES.VALIDATION_ERROR,
+        ERROR_CODES.VALIDATION,
         { errors },
       );
       return;

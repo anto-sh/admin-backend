@@ -19,7 +19,7 @@ export const getAllServiceCategoriesWithServices = async (): Promise<
 };
 
 export const createServiceCategory = async (
-  dto: CreateServiceCategoryDto
+  dto: CreateServiceCategoryDto,
 ): Promise<ServiceCategory> => {
   // Проверка уникальности name
   const nameExists = await serviceCategoryRepository.findOneBy({
@@ -45,7 +45,7 @@ export const createServiceCategory = async (
 
 export const updateServiceCategory = async (
   id: number,
-  dto: UpdateServiceCategoryDto
+  dto: UpdateServiceCategoryDto,
 ): Promise<UpdateResult | null> => {
   // Проверка уникальности name (если передан)
   if (dto.name) {
@@ -55,6 +55,7 @@ export const updateServiceCategory = async (
       .andWhere("category.id != :id", { id })
       .getOne();
     if (nameExists) {
+      // TODO: Почему в апдейте такая ошибка вообще возможна?
       throw new Error("Категория с таким именем уже существует", {
         cause: 409,
       });
@@ -69,6 +70,7 @@ export const updateServiceCategory = async (
       .andWhere("category.id != :id", { id })
       .getOne();
     if (urlExists) {
+      // TODO: Почему в апдейте такая ошибка вообще возможна?
       throw new Error("Категория с таким url уже существует", { cause: 409 });
     }
   }

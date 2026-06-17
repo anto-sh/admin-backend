@@ -8,8 +8,8 @@ import {
 import { ServiceCategory } from "../models/entities/service-category.entity";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
 import { ERROR_CODES } from "../config/constants";
 
 const toResponseDto = (
@@ -59,7 +59,7 @@ export const createServiceCategory = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
+      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION, { errors });
       return;
     }
 
@@ -85,7 +85,7 @@ export const updateServiceCategory = async (req: Request, res: Response) => {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION_ERROR, { errors });
+      handleError(res, new Error("Ошибки валидации"), ERROR_CODES.VALIDATION, { errors });
       return;
     }
 

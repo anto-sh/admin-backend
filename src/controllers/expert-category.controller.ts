@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import * as expertCategoryService from "../services/expert-category.service";
 import { ExpertCategoryResponseDto } from "../models/dto/expert-category.dto";
 import { ExpertCategory } from "../models/entities/expert-category.entity";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
 
 const toResponseDto = (entity: ExpertCategory): ExpertCategoryResponseDto => ({
   id: entity.id,
