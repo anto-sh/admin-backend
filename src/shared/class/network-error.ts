@@ -1,5 +1,5 @@
 import { ERROR_CODES } from "../../config/constants";
-import { NetworkMessage } from "../../models/dto/api-response.dto";
+import { NetworkMessage } from "@anto-sh/admin-network-shared";
 
 export class NetworkError extends Error {
   statusCode: ERROR_CODES;

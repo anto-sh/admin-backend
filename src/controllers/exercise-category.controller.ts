@@ -12,8 +12,8 @@ import { sendResponse } from "../utils/send-response";
 import { handleError } from "../utils/handle-error";
 import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
 import { NetworkError } from "../shared/class/network-error";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
-import { NetworkMessageParamsFor } from "../config/network-message-params";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const toResponseDto = (
   entity: ExerciseCategory,
@@ -94,7 +94,7 @@ export const createExerciseCategory = async (req: Request, res: Response) => {
 
 export const updateExerciseCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdateExerciseCategoryDto, req.body);
     const validationErrors = await validate(dto);
 
@@ -146,7 +146,7 @@ export const updateExerciseCategory = async (req: Request, res: Response) => {
 
 export const deleteExerciseCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await exerciseCategoryService.deleteExerciseCategory(id);
 
     if (!success) {

@@ -5,9 +5,10 @@ import {
   UpdateServiceCategoryDto,
 } from "../models/dto/service-category.dto";
 import { NetworkError } from "../shared/class/network-error";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 import { ERROR_CODES } from "../config/constants";
-import { NetworkMessageParamsFor } from "../config/network-message-params";
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const serviceCategoryRepository = AppDataSource.getRepository(ServiceCategory);
 

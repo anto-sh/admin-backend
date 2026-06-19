@@ -5,7 +5,8 @@ import { sendResponse } from "../utils/send-response";
 import { handleError } from "../utils/handle-error";
 import { NetworkError } from "../shared/class/network-error";
 import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 
 export const upload = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -6,8 +6,9 @@ import {
 } from "../models/dto/exercise-category.dto";
 import { NetworkError } from "../shared/class/network-error";
 import { ERROR_CODES } from "../config/constants";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
-import { NetworkMessageParamsFor } from "../config/network-message-params";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const exerciseCategoryRepository =
   AppDataSource.getRepository(ExerciseCategory);

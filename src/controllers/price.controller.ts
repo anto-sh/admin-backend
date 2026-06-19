@@ -13,8 +13,9 @@ import { handleError } from "../utils/handle-error";
 import { Price } from "../models/entities/price.entity";
 import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
 import { NetworkError } from "../shared/class/network-error";
-import { NetworkMessageParamsFor } from "../config/network-message-params";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 
 const toResponseDto = (entity: Price): PriceResponseDto => ({
   id: entity.id,
@@ -36,7 +37,7 @@ export const getAllPrices = async (req: Request, res: Response) => {
 
 export const getPriceById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const price = await priceService.getPriceById(id);
 
     if (!price) {
@@ -100,7 +101,7 @@ export const createPrice = async (req: Request, res: Response) => {
 
 export const updatePrice = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdatePriceDto, req.body);
     const validationErrors = await validate(dto);
 
@@ -188,7 +189,7 @@ export const updatePriceBatch = async (req: Request, res: Response) => {
 
 export const deletePrice = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await priceService.deletePrice(id);
 
     if (!success) {

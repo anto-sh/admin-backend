@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+import "reflect-metadata";
 import { AppDataSource } from "./config/database.config";
 import app from "./app";
 import { PORT } from "./config/constants";

@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { ApiResponse, NetworkMessage } from "../models/dto/api-response.dto";
+import { ApiResponse, NetworkMessage } from "@anto-sh/admin-network-shared";
 import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
 
 export function sendResponse<T>(

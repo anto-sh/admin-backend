@@ -1,8 +1,9 @@
 import { Response } from "express";
 import { sendResponse } from "./send-response";
-import { NetworkMessage } from "../models/dto/api-response.dto";
+import { NetworkMessage } from "@anto-sh/admin-network-shared";
 import { NetworkError } from "../shared/class/network-error";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 import { ERROR_CODES } from "../config/constants";
 
 export function handleError(res: Response, error: NetworkError | Error) {

@@ -12,8 +12,9 @@ import { sendResponse } from "../utils/send-response";
 import { handleError } from "../utils/handle-error";
 import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
 import { NetworkError } from "../shared/class/network-error";
-import { NETWORK_MESSAGE_CODES as NMC } from "../config/network-message-codes";
-import { NetworkMessageParamsFor } from "../config/network-message-params";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const toResponseDto = (entity: Expert): ExpertResponseDto => ({
   id: entity.id,
@@ -38,7 +39,7 @@ export const getAllExperts = async (req: Request, res: Response) => {
 
 export const getExpertById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const expert = await expertService.getExpertById(id);
 
     if (!expert) {
@@ -105,7 +106,7 @@ export const createExpert = async (req: Request, res: Response) => {
 
 export const updateExpert = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdateExpertDto, req.body);
     const validationErrors = await validate(dto);
 
@@ -157,7 +158,7 @@ export const updateExpert = async (req: Request, res: Response) => {
 
 export const deleteExpert = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await expertService.deleteExpert(id);
 
     if (!success) {
