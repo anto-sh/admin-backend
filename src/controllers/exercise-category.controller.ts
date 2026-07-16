@@ -8,11 +8,15 @@ import {
 import { ExerciseCategory } from "../models/entities/exercise-category.entity";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const toResponseDto = (
-  entity: ExerciseCategory
+  entity: ExerciseCategory,
 ): ExerciseCategoryResponseDto => ({
   id: entity.id,
   name: entity.name,
@@ -27,17 +31,16 @@ export const getAllExerciseCategories = async (req: Request, res: Response) => {
     const data = exerciseCategories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const getAllExerciseCategoriesWithExercises = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const exerciseCategories =
@@ -45,85 +48,131 @@ export const getAllExerciseCategoriesWithExercises = async (
     const data = exerciseCategories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const createExerciseCategory = async (req: Request, res: Response) => {
   try {
     const dto = plainToClass(CreateExerciseCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError({
+        statusCode: ERROR_CODES.VALIDATION,
+        networkMessage: {
+          code: NMC.COMMON_ERRORS.VALIDATION,
+        },
+        data: { validationErrors },
+      });
     }
 
     const exerciseCategory =
       await exerciseCategoryService.createExerciseCategory(dto);
     const data = toResponseDto(exerciseCategory);
+
     sendResponse(res, {
-      status: "success",
-      code: 201,
-      message: "Новая категория успешно добавлена",
+      statusCode: SUCCESS_CODES.CREATED,
+      message: {
+        code: NMC.EXERCISE_CATEGORY.CREATED,
+        params: {
+          name: data.name,
+          url: data.url,
+        } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.CREATED
+        >,
+      },
       data,
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const updateExerciseCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdateExerciseCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
+        },
+        "Ошибки валидации",
+      );
     }
 
     const updateResult = await exerciseCategoryService.updateExerciseCategory(
       id,
-      dto
+      dto,
     );
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: `Категория № ${id} успешно обновлена`,
+      message: {
+        code: NMC.EXERCISE_CATEGORY.UPDATED,
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.UPDATED
+        >,
+      },
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const deleteExerciseCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await exerciseCategoryService.deleteExerciseCategory(id);
 
     if (!success) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: "Категория успешно удалена",
+      message: {
+        code: NMC.EXERCISE_CATEGORY.DELETED,
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.EXERCISE_CATEGORY.DELETED
+        >,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };

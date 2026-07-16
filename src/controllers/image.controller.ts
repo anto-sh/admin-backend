@@ -1,6 +1,12 @@
 import { Request, Response } from "express";
 import path from "path";
 import imageService from "../services/image.service";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { NetworkError } from "../shared/class/network-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 
 // Типизация Multer file
 export interface MulterFile {
@@ -15,31 +21,39 @@ export interface MulterFile {
   buffer?: Buffer;
 }
 
-class ImageController {
-  async upload(req: Request, res: Response): Promise<void> {
-    try {
-      const file = req.file as MulterFile | undefined;
-      if (!file) {
-        res.status(400).json({ success: 0, error: "Нет файла" });
-        return;
-      }
+export const upload = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const file = req.file as MulterFile | undefined;
 
-      const url = imageService.getImageUrl(req, file.filename);
-
-      res.json({
-        success: 1,
-        file: {
-          url,
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          size: file.size,
-          extension: path.extname(file.originalname).replace(".", ""),
+    if (!file) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.BAD_REQUEST,
+          networkMessage: {
+            code: NMC.IMAGE.ERROR.N0_FILE,
+          },
         },
-      });
-    } catch (error) {
-      res.status(500).json({ success: 0, error: "Internal server error" });
+        "Нет файла!",
+      );
     }
-  }
-}
 
-export default new ImageController();
+    const url = imageService.getImageUrl(req, file.filename);
+    const data = {
+      url,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      extension: path.extname(file.originalname).replace(".", ""),
+    };
+
+    sendResponse(res, {
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.IMAGE.UPLOADED,
+      },
+      data,
+    });
+  } catch (error) {
+    handleError(res, error as NetworkError | Error);
+  }
+};

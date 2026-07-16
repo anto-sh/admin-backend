@@ -9,28 +9,23 @@ import { UpdateResult } from "typeorm";
 
 const treatmentRepository = AppDataSource.getRepository(Treatment);
 
-export const getAllTreatments = async (): Promise<Treatment[]> => {
-  return await treatmentRepository.find();
+export const getAllTreatments = () => {
+  return treatmentRepository.find();
 };
 
-export const createTreatment = async (
-  dto: CreateTreatmentDto
-): Promise<Treatment> => {
+export const createTreatment = (dto: CreateTreatmentDto) => {
   const treatment = Treatment.fromDto(dto);
-  return await treatmentRepository.save(treatment);
+  return treatmentRepository.save(treatment);
 };
 
-export const updateTreatment = async (
-  id: number,
-  dto: UpdateTreatmentDto
-): Promise<UpdateResult | null> => {
-  return await treatmentRepository.update(id, dto);
+export const updateTreatment = (id: number, dto: UpdateTreatmentDto) => {
+  return treatmentRepository.update(id, dto);
 };
 
-export const updateTreatmentBatch = async (
-  treatmentsToUpdate: UpdateTreatmentBatchDto[]
-): Promise<void> => {
-  await treatmentRepository.save(treatmentsToUpdate);
+export const updateTreatmentBatch = (
+  treatmentsToUpdate: UpdateTreatmentBatchDto[],
+) => {
+  return treatmentRepository.save(treatmentsToUpdate);
 };
 
 export const deleteTreatment = async (id: number): Promise<boolean> => {

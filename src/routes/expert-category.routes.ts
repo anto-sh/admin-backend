@@ -8,7 +8,7 @@ const router = Router();
 
 router.get("/", getAllExpertCategories as RequestHandler);
 router.get(
-  "/with-experts",
+  "/with-entities",
   getAllExpertCategoriesWithExperts as RequestHandler
 );
 

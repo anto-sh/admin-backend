@@ -1,33 +1,47 @@
 import { Request, Response } from "express";
 import path from "path";
 import videoService from "../services/video.service";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { NetworkError } from "../shared/class/network-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
 
-class VideoController {
-  async upload(req: Request, res: Response): Promise<void> {
-    try {
-      const file = req.file as Express.Multer.File | undefined;
-      if (!file) {
-        res.status(400).json({ success: 0, error: "Нет файла" });
-        return;
-      }
+export const upload = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const file = req.file as Express.Multer.File | undefined;
 
-      const url = videoService.getVideoUrl(req, file.filename);
-
-      res.json({
-        success: 1,
-        file: {
-          url,
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          size: file.size,
-          extension: path.extname(file.originalname).replace(".", ""),
-          // width, height и др. можно добавить, если потребуется анализировать видео
+    if (!file) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.BAD_REQUEST,
+          networkMessage: {
+            code: NMC.VIDEO.ERROR.N0_FILE,
+          },
         },
-      });
-    } catch (error) {
-      res.status(500).json({ success: 0, error: "Internal server error" });
+        "Нет файла!",
+      );
     }
-  }
-}
 
-export default new VideoController();
+    const url = videoService.getVideoUrl(req, file.filename);
+    const data = {
+      url,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      extension: path.extname(file.originalname).replace(".", ""),
+      // width, height, etc. можно добавить, если потребуется анализировать видео
+    };
+
+    sendResponse(res, {
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.VIDEO.UPLOADED,
+      },
+      data,
+    });
+  } catch (error) {
+    handleError(res, error as NetworkError | Error);
+  }
+};
