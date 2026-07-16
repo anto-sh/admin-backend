@@ -8,8 +8,13 @@ import {
 import { Service } from "../models/entities/service.entity";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const toResponseDto = (entity: Service): ServiceResponseDto => ({
   id: entity.id,
@@ -26,100 +31,158 @@ export const getAllServices = async (req: Request, res: Response) => {
     const data = services.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const getServiceById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const service = await serviceService.getServiceById(id);
 
     if (!service) {
-      handleError(res, new Error("Услуга не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Услуга № ${id} не найдена`,
+      );
     }
 
     const data = toResponseDto(service);
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const createService = async (req: Request, res: Response) => {
   try {
     const dto = plainToClass(CreateServiceDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
+        },
+        "Ошибки валидации",
+      );
     }
 
     const service = await serviceService.createService(dto);
     const data = toResponseDto(service);
 
     sendResponse(res, {
-      status: "success",
-      code: 201,
-      message: "Новая услуга успешно добавлена",
+      statusCode: SUCCESS_CODES.CREATED,
+      message: {
+        code: NMC.SERVICE.CREATED,
+        params: {
+          name: data.name,
+        } satisfies NetworkMessageParamsFor<typeof NMC.SERVICE.CREATED>,
+      },
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const updateService = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdateServiceDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.VALIDATION,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.VALIDATION,
+          },
+          data: { validationErrors },
+        },
+        "Ошибки валидации",
+      );
     }
 
     const updateResult = await serviceService.updateService(id, dto);
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Услуга не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Услуга № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: `Услуга № ${id} успешно обновлена`,
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.SERVICE.UPDATED,
+        params: {
+          id,
+        } satisfies NetworkMessageParamsFor<typeof NMC.SERVICE.UPDATED>,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const deleteService = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await serviceService.deleteService(id);
 
     if (!success) {
-      handleError(res, new Error("Услуга не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Услуга № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: "Услуга успешно удалена",
+      statusCode: SUCCESS_CODES.OK,
+      message: {
+        code: NMC.SERVICE.DELETED,
+        params: {
+          id,
+        } satisfies NetworkMessageParamsFor<typeof NMC.SERVICE.DELETED>,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };

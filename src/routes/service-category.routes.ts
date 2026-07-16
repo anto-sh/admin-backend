@@ -11,8 +11,8 @@ const router = Router();
 
 router.get("/", getAllServiceCategories as RequestHandler);
 router.get(
-  "/with-services",
-  getAllServiceCategoriesWithServices as RequestHandler
+  "/with-entities",
+  getAllServiceCategoriesWithServices as RequestHandler,
 );
 router.post("/", createServiceCategory as RequestHandler);
 router.put("/:id", updateServiceCategory as RequestHandler);

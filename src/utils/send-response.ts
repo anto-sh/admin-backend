@@ -1,27 +1,27 @@
 import { Response } from "express";
-import { ApiResponse } from "../models/dto/api-response.dto";
+import { ApiResponse, NetworkMessage } from "@anto-sh/admin-network-shared";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
 
 export function sendResponse<T>(
   res: Response,
   options: {
     status?: "success" | "error";
-    code?: number;
-    message?: string;
+    statusCode?: ERROR_CODES | SUCCESS_CODES;
+    message?: NetworkMessage;
     data?: T;
     headers?: Record<string, string>;
-  }
+  },
 ) {
   const {
     status = "success",
-    code = 200,
-    message = "",
+    statusCode = SUCCESS_CODES.OK,
+    message,
     data,
     headers = {},
   } = options;
 
   const response: ApiResponse<T> = {
     status,
-    code,
     message,
     data,
     timestamp: new Date().toISOString(),
@@ -34,5 +34,5 @@ export function sendResponse<T>(
     });
   }
 
-  return res.status(code).json(response);
+  return res.status(statusCode).json(response);
 }

@@ -8,11 +8,16 @@ import {
 import { ServiceCategory } from "../models/entities/service-category.entity";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { ERROR_CODES, SUCCESS_CODES } from "../config/constants";
+import { NetworkError } from "../shared/class/network-error";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+ 
+import { NetworkMessageParamsFor } from "@anto-sh/admin-network-shared";
 
 const toResponseDto = (
-  entity: ServiceCategory
+  entity: ServiceCategory,
 ): ServiceCategoryResponseDto => ({
   id: entity.id,
   name: entity.name,
@@ -26,17 +31,16 @@ export const getAllServiceCategories = async (req: Request, res: Response) => {
     const data = categories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const getAllServiceCategoriesWithServices = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const categories =
@@ -44,85 +48,127 @@ export const getAllServiceCategoriesWithServices = async (
     const data = categories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const createServiceCategory = async (req: Request, res: Response) => {
   try {
     const dto = plainToClass(CreateServiceCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError({
+        statusCode: ERROR_CODES.VALIDATION,
+        networkMessage: {
+          code: NMC.COMMON_ERRORS.VALIDATION,
+        },
+        data: { validationErrors },
+      });
     }
 
     const category = await serviceCategoryService.createServiceCategory(dto);
     const data = toResponseDto(category);
 
     sendResponse(res, {
-      status: "success",
-      code: 201,
-      message: "Новая категория успешно добавлена",
+      statusCode: SUCCESS_CODES.CREATED,
+      message: {
+        code: NMC.SERVICE_CATEGORY.CREATED,
+        params: {
+          name: data.name,
+          url: data.url,
+        } satisfies NetworkMessageParamsFor<
+          typeof NMC.SERVICE_CATEGORY.CREATED
+        >,
+      },
       data,
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const updateServiceCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const dto = plainToClass(UpdateServiceCategoryDto, req.body);
-    const errors = await validate(dto);
+    const validationErrors = await validate(dto);
 
-    if (errors.length > 0) {
-      handleError(res, new Error("Ошибки валидации"), 400, { errors });
-      return;
+    if (validationErrors.length > 0) {
+      throw new NetworkError({
+        statusCode: ERROR_CODES.VALIDATION,
+        networkMessage: {
+          code: NMC.COMMON_ERRORS.VALIDATION,
+        },
+        data: { validationErrors },
+      });
     }
 
     const updateResult = await serviceCategoryService.updateServiceCategory(
       id,
-      dto
+      dto,
     );
 
     if (!updateResult?.affected) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: `Категория № ${id} успешно обновлена`,
+      message: {
+        code: NMC.SERVICE_CATEGORY.UPDATED,
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.SERVICE_CATEGORY.UPDATED
+        >,
+      },
     });
   } catch (error) {
-    if ((error as Error).cause === 409) handleError(res, error as Error, 409);
-    else handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const deleteServiceCategory = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await serviceCategoryService.deleteServiceCategory(id);
 
     if (!success) {
-      handleError(res, new Error("Категория не найдена"), 404);
-      return;
+      throw new NetworkError(
+        {
+          statusCode: ERROR_CODES.NOT_FOUND,
+          networkMessage: {
+            code: NMC.COMMON_ERRORS.NOT_FOUND,
+            params: { id } satisfies NetworkMessageParamsFor<
+              typeof NMC.COMMON_ERRORS.NOT_FOUND
+            >,
+          },
+        },
+        `Категория № ${id} не найдена`,
+      );
     }
 
     sendResponse(res, {
-      status: "success",
-      message: "Категория успешно удалена",
+      message: {
+        code: NMC.SERVICE_CATEGORY.DELETED,
+        params: { id } satisfies NetworkMessageParamsFor<
+          typeof NMC.SERVICE_CATEGORY.DELETED
+        >,
+      },
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };

@@ -3,12 +3,10 @@ import { ExpertCategory } from "../models/entities/expert-category.entity";
 
 const expertCategoryRepository = AppDataSource.getRepository(ExpertCategory);
 
-export const getAllExpertCategories = async (): Promise<ExpertCategory[]> => {
-  return await expertCategoryRepository.find();
+export const getAllExpertCategories = () => {
+  return expertCategoryRepository.find();
 };
 
-export const getAllExpertCategoriesWithExperts = async (): Promise<
-  ExpertCategory[]
-> => {
-  return await expertCategoryRepository.find({ relations: ["experts"] });
+export const getAllExpertCategoriesWithExperts = () => {
+  return expertCategoryRepository.find({ relations: ["experts"] });
 };

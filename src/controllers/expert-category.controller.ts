@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import * as expertCategoryService from "../services/expert-category.service";
 import { ExpertCategoryResponseDto } from "../models/dto/expert-category.dto";
 import { ExpertCategory } from "../models/entities/expert-category.entity";
-import { sendResponse } from "../utils/api-response";
-import { handleError } from "../utils/error-handler";
+import { sendResponse } from "../utils/send-response";
+import { handleError } from "../utils/handle-error";
+import { NetworkError } from "../shared/class/network-error";
 
 const toResponseDto = (entity: ExpertCategory): ExpertCategoryResponseDto => ({
   id: entity.id,
@@ -18,17 +19,16 @@ export const getAllExpertCategories = async (req: Request, res: Response) => {
     const data = categories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
 
 export const getAllExpertCategoriesWithExperts = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const categories =
@@ -36,10 +36,9 @@ export const getAllExpertCategoriesWithExperts = async (
     const data = categories.map(toResponseDto);
 
     sendResponse(res, {
-      status: "success",
       data,
     });
   } catch (error) {
-    handleError(res, error as Error);
+    handleError(res, error as NetworkError | Error);
   }
 };
