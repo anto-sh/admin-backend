@@ -15,7 +15,7 @@ router.get(
   getAllExerciseCategoriesWithExercises as RequestHandler
 );
 router.post("/", createExerciseCategory as RequestHandler);
-router.put("/:id", updateExerciseCategory as RequestHandler);
+router.patch("/:id", updateExerciseCategory as RequestHandler);
 router.delete("/:id", deleteExerciseCategory as RequestHandler);
 
 export const exerciseCategoryRoutes = router;

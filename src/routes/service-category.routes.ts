@@ -15,7 +15,7 @@ router.get(
   getAllServiceCategoriesWithServices as RequestHandler,
 );
 router.post("/", createServiceCategory as RequestHandler);
-router.put("/:id", updateServiceCategory as RequestHandler);
+router.patch("/:id", updateServiceCategory as RequestHandler);
 router.delete("/:id", deleteServiceCategory as RequestHandler);
 
 export const serviceCategoryRoutes = router;

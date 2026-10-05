@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/", getAllTreatments as RequestHandler);
 router.post("/", createTreatment as RequestHandler);
-router.put("/:id", updateTreatment as RequestHandler);
+router.patch("/:id", updateTreatment as RequestHandler);
 router.patch("/batch", updateTreatmentBatch as RequestHandler);
 router.delete("/:id", deleteTreatment as RequestHandler);
 

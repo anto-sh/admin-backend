@@ -11,7 +11,7 @@ const router = Router();
 router.get("/", getAllExercises as RequestHandler);
 router.get("/:id", getExerciseById as RequestHandler);
 router.post("/", createExercise as RequestHandler);
-router.put("/:id", updateExercise as RequestHandler);
+router.patch("/:id", updateExercise as RequestHandler);
 router.delete("/:id", deleteExercise as RequestHandler);
 
 export const exerciseRoutes = router;
