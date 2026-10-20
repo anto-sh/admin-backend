@@ -8,6 +8,7 @@ Backend for the Amplituda rehabilitation center administrative interface.
 
 - Backend: [anto-sh/admin-backend](https://github.com/anto-sh/admin-backend).
 - Frontend: [anto-sh/admin-frontend](https://github.com/anto-sh/admin-frontend), normally at `../admin-frontend` locally.
+- Shared package: [anto-sh/admin-network-shared](https://github.com/anto-sh/admin-network-shared), normally at `../admin-network-shared` locally.
 
 ## Project documentation
 
