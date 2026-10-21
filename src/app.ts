@@ -4,9 +4,13 @@ import bodyParser from "body-parser";
 import path from "path";
 import fs from "fs";
 import {
+  ERROR_CODES,
   IMAGE_UPLOAD_DIR_NAME,
   VIDEO_UPLOAD_DIR_NAME,
 } from "./config/constants";
+import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+import { NetworkError } from "./shared/class/network-error";
+import { handleError } from "./utils/handle-error";
 //routes
 import { treatmentRoutes } from "./routes/treatment.routes";
 import { exerciseCategoryRoutes } from "./routes/exercise-category.routes";
@@ -23,7 +27,7 @@ const app = express();
 
 // middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "1mb" }));
 
 // frontend static path
 const frontPath = path.join(__dirname, "..", "..", "admin-frontend/dist");
@@ -70,13 +74,41 @@ app.use("/api/prices", priceRoutes);
 // error handling
 app.use(
   (
-    err: Error,
+    err: unknown,
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(err.stack);
-    res.status(500).json({ message: "Ошибка сервера!" });
+    if (res.headersSent) return next(err);
+
+    if (err instanceof Error && "type" in err && "status" in err) {
+      const isInvalidJson =
+        err.type === "entity.parse.failed" && err.status === ERROR_CODES.BAD_REQUEST;
+      const isTooLarge =
+        err.type === "entity.too.large" && err.status === ERROR_CODES.PAYLOAD_TOO_LARGE;
+
+      if (isInvalidJson || isTooLarge) {
+        const message = isTooLarge
+          ? "Размер JSON-тела запроса не должен превышать 1 МиБ"
+          : "Тело запроса должно содержать корректный JSON";
+
+        return handleError(res, new NetworkError(
+          {
+            statusCode: isTooLarge ? ERROR_CODES.PAYLOAD_TOO_LARGE : ERROR_CODES.BAD_REQUEST,
+            networkMessage: { code: NMC.COMMON_ERRORS.VALIDATION },
+            data: {
+              validationErrors: [{
+                property: "",
+                constraints: { [isTooLarge ? "maxBodySize" : "isJson"]: message },
+              }],
+            },
+          },
+          message,
+        ));
+      }
+    }
+
+    handleError(res, err instanceof Error ? err : new Error("Неизвестная ошибка сервера"));
   }
 );
 
