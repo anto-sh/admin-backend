@@ -4,18 +4,29 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  RelationId,
+  DeepPartial,
 } from "typeorm";
 import {
+  ArrayMaxSize,
   IsNotEmpty,
   IsString,
   IsArray,
-  ArrayNotEmpty,
   IsInt,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { ServiceCategory } from "./service-category.entity";
-import { CreateServiceDto } from "../dto/service.dto";
+import {
+  CreateServiceDto,
+  UpdateServiceDto,
+  SERVICE_LIMITS,
+  SERVICE_IMAGE_URL_PATTERN,
+} from "../dto/service.dto";
 
 @Entity("service")
 export class Service {
@@ -25,22 +36,28 @@ export class Service {
   @Column()
   @IsNotEmpty()
   @IsString()
+  @MaxLength(SERVICE_LIMITS.maxNameLength)
   name!: string;
 
   @Column({ name: "image_url" })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(SERVICE_LIMITS.maxImageUrlLength)
+  @Matches(SERVICE_IMAGE_URL_PATTERN)
   imageUrl!: string;
 
   @Column("decimal", { precision: 10, scale: 2 })
-  @IsNotEmpty()
   @IsInt()
+  @Min(0)
+  @Max(SERVICE_LIMITS.maxPrice)
   price!: number;
 
-  @Column("simple-array")
+  @Column("simple-json")
   @IsArray()
-  @ArrayNotEmpty()
+  @ArrayMaxSize(SERVICE_LIMITS.maxProcedures)
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @MaxLength(SERVICE_LIMITS.maxProcedureLength, { each: true })
   procedures!: string[];
 
   @ManyToOne(() => ServiceCategory, (category) => category.services, {
@@ -52,14 +69,17 @@ export class Service {
   @Type(() => ServiceCategory)
   category!: ServiceCategory;
 
-  static fromDto(dto: CreateServiceDto): Service {
-    const service = new Service();
-    service.name = dto.name;
-    service.imageUrl = dto.imageUrl;
-    service.price = dto.price;
-    service.procedures = dto.procedures;
-    service.category = new ServiceCategory();
-    service.category.id = dto.categoryId;
-    return service;
+  @RelationId((service: Service) => service.category)
+  categoryId!: number;
+
+  static fromDto(dto: CreateServiceDto | UpdateServiceDto): DeepPartial<Service> {
+    return {
+      name: dto.name,
+      imageUrl: dto.imageUrl,
+      price: dto.price,
+      procedures: dto.procedures,
+      category:
+        dto.categoryId === undefined ? undefined : { id: dto.categoryId },
+    };
   }
 }
