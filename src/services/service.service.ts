@@ -3,29 +3,19 @@ import { Service } from "../models/entities/service.entity";
 import { ServiceCategory } from "../models/entities/service-category.entity";
 import { CreateServiceDto, UpdateServiceDto } from "../models/dto/service.dto";
 import { QueryFailedError } from "typeorm";
-import { NetworkError } from "../shared/class/network-error";
-import { ERROR_CODES } from "../config/constants";
-import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
+import { VALIDATION_CODES as VC } from "@anto-sh/admin-network-shared";
+import { createValidationError } from "../shared/validation";
 
 const serviceRepository = AppDataSource.getRepository(Service);
 const serviceCategoryRepository = AppDataSource.getRepository(ServiceCategory);
 
-const categoryNotFoundError = () => new NetworkError(
-  {
-    statusCode: ERROR_CODES.VALIDATION,
-    networkMessage: { code: NMC.COMMON_ERRORS.VALIDATION },
-    data: {
-      validationErrors: [{
-        property: "categoryId",
-        constraints: { categoryNotFound: "Категория не существует" },
-      }],
-    },
-  },
-  "Категория услуги не найдена",
-);
+const categoryNotFoundError = () =>
+  createValidationError([
+    { path: ["categoryId"], code: VC.REFERENCE_NOT_FOUND },
+  ]);
 
 const ensureCategoryExists = async (categoryId: number) => {
-  if (!await serviceCategoryRepository.existsBy({ id: categoryId })) {
+  if (!(await serviceCategoryRepository.existsBy({ id: categoryId }))) {
     throw categoryNotFoundError();
   }
 };

@@ -1,15 +1,17 @@
 import {
-  ArrayMaxSize,
-  IsArray,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsString,
   Matches,
   Max,
   MaxLength,
   Min,
 } from "class-validator";
-import { Transform, TransformFnParams } from "class-transformer";
+import { Transform } from "class-transformer";
+import { VALIDATION_CODES as VC } from "@anto-sh/admin-network-shared";
+import { ValidateItems, validationContext } from "../../shared/validation";
+import { trimStringTransform } from "../../shared/transformers/trim-string";
 
 export const SERVICE_LIMITS = {
   maxPrice: 10_000_000,
@@ -19,105 +21,126 @@ export const SERVICE_LIMITS = {
   maxImageUrlLength: 2048,
 } as const;
 
-export const SERVICE_IMAGE_URL_PATTERN = /^\/img\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/;
+export const SERVICE_IMAGE_URL_PATTERN =
+  /^\/img\/[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/;
 
-const trimString = ({ value }: TransformFnParams): unknown =>
-  typeof value === "string" ? value.trim() : value;
-
-const trimProcedures = ({ value }: TransformFnParams): unknown =>
-  Array.isArray(value)
-    ? value.map((procedure: unknown) =>
-        typeof procedure === "string" ? procedure.trim() : procedure,
-      )
-    : value;
+export class ServiceProcedureDto {
+  @Transform(trimStringTransform)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsString(validationContext({ code: VC.STRING }))
+  @MaxLength(
+    SERVICE_LIMITS.maxProcedureLength,
+    validationContext({
+      code: VC.MAX_LENGTH,
+      params: { max: SERVICE_LIMITS.maxProcedureLength },
+    }),
+  )
+  value!: string;
+}
 
 export class CreateServiceDto {
-  @Transform(trimString)
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(SERVICE_LIMITS.maxNameLength, {
-    message: "Название не должно превышать $constraint1 символов",
-  })
+  @Transform(trimStringTransform)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsString(validationContext({ code: VC.STRING }))
+  @MaxLength(
+    SERVICE_LIMITS.maxNameLength,
+    validationContext({
+      code: VC.MAX_LENGTH,
+      params: { max: SERVICE_LIMITS.maxNameLength },
+    }),
+  )
   name!: string;
 
-  @Transform(trimString)
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(SERVICE_LIMITS.maxImageUrlLength, {
-    message: "Путь к изображению не должен превышать $constraint1 символов",
-  })
-  @Matches(SERVICE_IMAGE_URL_PATTERN, {
-    message: "Укажите локальный путь к изображению в формате /img/имя-файла",
-  })
+  @Transform(trimStringTransform)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsString(validationContext({ code: VC.STRING }))
+  @MaxLength(
+    SERVICE_LIMITS.maxImageUrlLength,
+    validationContext({
+      code: VC.MAX_LENGTH,
+      params: { max: SERVICE_LIMITS.maxImageUrlLength },
+    }),
+  )
+  @Matches(
+    SERVICE_IMAGE_URL_PATTERN,
+    validationContext({ code: VC.IMAGE_PATH }),
+  )
   imageUrl!: string;
 
-  @IsInt()
-  @Min(0)
-  @Max(SERVICE_LIMITS.maxPrice, {
-    message: "Цена не должна превышать $constraint1 ₽",
-  })
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsNumber({}, validationContext({ code: VC.NUMBER }))
+  @IsInt(validationContext({ code: VC.INTEGER }))
+  @Min(0, validationContext({ code: VC.MIN, params: { min: 0 } }))
+  @Max(
+    SERVICE_LIMITS.maxPrice,
+    validationContext({
+      code: VC.MAX,
+      params: { max: SERVICE_LIMITS.maxPrice },
+    }),
+  )
   price!: number;
 
-  @Transform(trimProcedures)
-  @IsArray()
-  @ArrayMaxSize(SERVICE_LIMITS.maxProcedures, {
-    message: "Количество процедур не должно превышать $constraint1",
-  })
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
-  @MaxLength(SERVICE_LIMITS.maxProcedureLength, {
-    each: true,
-    message: "Название процедуры не должно превышать $constraint1 символов",
-  })
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @ValidateItems(ServiceProcedureDto, { maxSize: SERVICE_LIMITS.maxProcedures })
   procedures!: string[];
 
-  @IsInt()
-  @Min(1)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsNumber({}, validationContext({ code: VC.NUMBER }))
+  @IsInt(validationContext({ code: VC.INTEGER }))
+  @Min(1, validationContext({ code: VC.MIN, params: { min: 1 } }))
   categoryId!: number;
 }
 
 export class UpdateServiceDto {
-  @Transform(trimString)
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(SERVICE_LIMITS.maxNameLength, {
-    message: "Название не должно превышать $constraint1 символов",
-  })
+  @Transform(trimStringTransform)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsString(validationContext({ code: VC.STRING }))
+  @MaxLength(
+    SERVICE_LIMITS.maxNameLength,
+    validationContext({
+      code: VC.MAX_LENGTH,
+      params: { max: SERVICE_LIMITS.maxNameLength },
+    }),
+  )
   name?: string;
 
-  @Transform(trimString)
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(SERVICE_LIMITS.maxImageUrlLength, {
-    message: "Путь к изображению не должен превышать $constraint1 символов",
-  })
-  @Matches(SERVICE_IMAGE_URL_PATTERN, {
-    message: "Укажите локальный путь к изображению в формате /img/имя-файла",
-  })
+  @Transform(trimStringTransform)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsString(validationContext({ code: VC.STRING }))
+  @MaxLength(
+    SERVICE_LIMITS.maxImageUrlLength,
+    validationContext({
+      code: VC.MAX_LENGTH,
+      params: { max: SERVICE_LIMITS.maxImageUrlLength },
+    }),
+  )
+  @Matches(
+    SERVICE_IMAGE_URL_PATTERN,
+    validationContext({ code: VC.IMAGE_PATH }),
+  )
   imageUrl?: string;
 
-  @IsInt()
-  @Min(0)
-  @Max(SERVICE_LIMITS.maxPrice, {
-    message: "Цена не должна превышать $constraint1 ₽",
-  })
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsNumber({}, validationContext({ code: VC.NUMBER }))
+  @IsInt(validationContext({ code: VC.INTEGER }))
+  @Min(0, validationContext({ code: VC.MIN, params: { min: 0 } }))
+  @Max(
+    SERVICE_LIMITS.maxPrice,
+    validationContext({
+      code: VC.MAX,
+      params: { max: SERVICE_LIMITS.maxPrice },
+    }),
+  )
   price?: number;
 
-  @Transform(trimProcedures)
-  @IsArray()
-  @ArrayMaxSize(SERVICE_LIMITS.maxProcedures, {
-    message: "Количество процедур не должно превышать $constraint1",
-  })
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
-  @MaxLength(SERVICE_LIMITS.maxProcedureLength, {
-    each: true,
-    message: "Название процедуры не должно превышать $constraint1 символов",
-  })
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @ValidateItems(ServiceProcedureDto, { maxSize: SERVICE_LIMITS.maxProcedures })
   procedures?: string[];
 
-  @IsInt()
-  @Min(1)
+  @IsNotEmpty(validationContext({ code: VC.REQUIRED }))
+  @IsNumber({}, validationContext({ code: VC.NUMBER }))
+  @IsInt(validationContext({ code: VC.INTEGER }))
+  @Min(1, validationContext({ code: VC.MIN, params: { min: 1 } }))
   categoryId?: number;
 }
 
