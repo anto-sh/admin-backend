@@ -8,8 +8,8 @@ import {
   IMAGE_UPLOAD_DIR_NAME,
   VIDEO_UPLOAD_DIR_NAME,
 } from "./config/constants";
-import { NETWORK_MESSAGE_CODES as NMC } from "@anto-sh/admin-network-shared";
-import { NetworkError } from "./shared/class/network-error";
+import { VALIDATION_CODES as VC } from "@anto-sh/admin-network-shared";
+import { createValidationError } from "./shared/validation";
 import { handleError } from "./utils/handle-error";
 //routes
 import { treatmentRoutes } from "./routes/treatment.routes";
@@ -23,11 +23,13 @@ import { expertCategoryRoutes } from "./routes/expert-category.routes";
 import { expertRoutes } from "./routes/expert.routes";
 import { priceRoutes } from "./routes/price.routes";
 
+const JSON_BODY_LIMIT_BYTES = 1024 * 1024;
+
 const app = express();
 
 // middleware
 app.use(cors());
-app.use(bodyParser.json({ limit: "1mb" }));
+app.use(bodyParser.json({ limit: JSON_BODY_LIMIT_BYTES }));
 
 // frontend static path
 const frontPath = path.join(__dirname, "..", "..", "admin-frontend/dist");
@@ -77,39 +79,44 @@ app.use(
     err: unknown,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    next: express.NextFunction,
   ) => {
     if (res.headersSent) return next(err);
 
     if (err instanceof Error && "type" in err && "status" in err) {
       const isInvalidJson =
-        err.type === "entity.parse.failed" && err.status === ERROR_CODES.BAD_REQUEST;
+        err.type === "entity.parse.failed" &&
+        err.status === ERROR_CODES.BAD_REQUEST;
       const isTooLarge =
-        err.type === "entity.too.large" && err.status === ERROR_CODES.PAYLOAD_TOO_LARGE;
+        err.type === "entity.too.large" &&
+        err.status === ERROR_CODES.PAYLOAD_TOO_LARGE;
 
       if (isInvalidJson || isTooLarge) {
-        const message = isTooLarge
-          ? "Размер JSON-тела запроса не должен превышать 1 МиБ"
-          : "Тело запроса должно содержать корректный JSON";
-
-        return handleError(res, new NetworkError(
-          {
-            statusCode: isTooLarge ? ERROR_CODES.PAYLOAD_TOO_LARGE : ERROR_CODES.BAD_REQUEST,
-            networkMessage: { code: NMC.COMMON_ERRORS.VALIDATION },
-            data: {
-              validationErrors: [{
-                property: "",
-                constraints: { [isTooLarge ? "maxBodySize" : "isJson"]: message },
-              }],
-            },
-          },
-          message,
-        ));
+        return handleError(
+          res,
+          createValidationError(
+            [
+              isTooLarge
+                ? {
+                    path: [],
+                    code: VC.REQUEST_TOO_LARGE,
+                    params: { maxBytes: JSON_BODY_LIMIT_BYTES },
+                  }
+                : { path: [], code: VC.INVALID_JSON },
+            ],
+            isTooLarge
+              ? ERROR_CODES.PAYLOAD_TOO_LARGE
+              : ERROR_CODES.BAD_REQUEST,
+          ),
+        );
       }
     }
 
-    handleError(res, err instanceof Error ? err : new Error("Неизвестная ошибка сервера"));
-  }
+    handleError(
+      res,
+      err instanceof Error ? err : new Error("Неизвестная ошибка сервера"),
+    );
+  },
 );
 
 export default app;

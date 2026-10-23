@@ -36,8 +36,9 @@ The [module README](src/shared/validation/README.md) describes the public functi
 # 3. API responses and errors
 
 - `sendResponse` returns `{ status, message?, data?, timestamp }`; message codes come from `@anto-sh/admin-network-shared`.
-- `handleError` preserves `NetworkError` status, message, and data; other controller errors become 500 with the unknown-error code.
-- Errors reaching the terminal Express middleware, including parser and Multer failures, return a plain 500 message outside the shared envelope.
+- `handleError` preserves `NetworkError` status, message, and data; other errors become 500 with the unknown-error code. The terminal Express error middleware also uses this handler and the shared response envelope.
+- The JSON parser has a 1 MiB body limit. Parse failures return 400 with `INVALID_JSON`; bodies exceeding the limit return 413 with `REQUEST_TOO_LARGE` and `params.maxBytes: 1048576`. Both use `data.validationErrors` with the root path `[]`.
+- If response headers have already been sent, the terminal middleware forwards the error with `next(err)`.
 
 # 4. API contract and frontend integration
 
