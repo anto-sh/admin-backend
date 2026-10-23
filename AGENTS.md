@@ -27,6 +27,7 @@ Use Node.js 22.16.0 (`.node-version`) and pnpm 10.11.0 (`package.json`). Run bac
 - Before changing application code, read `manifesto.md` and the shared principles it references.
 - Read only the relevant `DOCS.md` sections: architecture/startup (0), persistence (1), DTO validation/mapping (2), responses/errors (3), API contracts (4), and uploads/hosting (5). Consult `TODO.md` when planning related backlog work.
 - Follow the architecture and source layout described in [DOCS.md, section 0](DOCS.md#0-architecture-and-startup).
+- For DTO validation changes, follow [DOCS.md, section 2](DOCS.md#2-dto-validation-and-response-mapping); it links to the module's public API, limits, and tests.
 - Reuse the existing response and error mechanisms described in `DOCS.md` section 3 when adding endpoints.
 
 ## API contract sources

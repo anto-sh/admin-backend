@@ -19,8 +19,17 @@ The database initializes before HTTP startup. No authentication or authorization
 
 # 2. DTO validation and response mapping
 
-- DTOs use `class-transformer` and `class-validator`; failures return 422 with `data.validationErrors`.
-- Validation requirements follow decorators; TypeScript `?` does not make a field optional during validation.
+The shared `src/shared/validation` module checks request structure, rejects unknown fields, transforms input into DTO instances, and awaits class-validator checks. Invalid input produces a `NetworkError` (HTTP 422 by default) with `data.validationErrors` containing `path`, shared `code`, and optional `params`, without submitted values or library messages.
+
+Service endpoints use this module; other entity controllers retain their existing validation. To use it:
+
+- Import the public API from `src/shared/validation`. Attach `validationContext({ code })` or `validationContext({ code, params })` to each class-validator rule using codes from `@anto-sh/admin-network-shared`. Requiredness and `null` handling follow DTO decorators; TypeScript `?` alone does not make a field optional.
+- Declare array item rules with `@ValidateItems(ItemDto, { maxSize })`; the item DTO validates its `value` field, and errors contain numeric item indices.
+- Await `validateDto` and pass the returned transformed DTO to the service. `{ partial: true }` skips ordinary checks for `undefined` owner fields and rejects `{}`; supplied array items are fully validated. `{ array: true }` validates a root batch and returns DTOs in input order. Existing batch controllers do not use this mode.
+- For manual request or business checks, throw `createValidationError(issues, optionalStatus)` to use the same error format. Keep business dependencies in services.
+
+The [module README](src/shared/validation/README.md) describes the public functions, transformation order, PATCH details, structural limits, diagnostics, and tests.
+
 - Response mapping is manual; category children are returned as loaded entities.
 - Rich content uses JSON storage and object-level validation only.
 
