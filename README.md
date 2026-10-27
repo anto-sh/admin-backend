@@ -21,7 +21,7 @@ Backend for the Amplituda rehabilitation center administrative interface.
 Use Node.js 22.16.0 and pnpm 10.11.0.
 
 ```sh
-corepack enable
+npm install --global pnpm@10.11.0
 pnpm install --frozen-lockfile
 ```
 
