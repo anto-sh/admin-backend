@@ -9,6 +9,8 @@ Guidance for coding agents working in this repository. Project type: Node.js + T
 
 Use Node.js 22.16.0 (`.node-version`) and pnpm 10.11.0 (`package.json`). Run backend commands from this repository.
 
+- Use the standalone pnpm CLI installed with `npm install --global pnpm@10.11.0`.
+
 | Purpose | Command |
 | --- | --- |
 | Install dependencies | `pnpm install --frozen-lockfile` |
@@ -17,7 +19,7 @@ Use Node.js 22.16.0 (`.node-version`) and pnpm 10.11.0 (`package.json`). Run bac
 | Compile to `dist` | `pnpm build` |
 | Run compiled server | `pnpm start` |
 
-- Use the installed local TypeScript binary for type-checking instead of invoking it through pnpm/Corepack. On other platforms, use `./node_modules/.bin/tsc --noEmit`. Do not download pnpm solely to run the installed compiler.
+- Use the pnpm commands listed above for standard project tasks.
 - No lint or formatting command is configured. `pnpm test` is a failing placeholder; no automated test suite or isolated integration-check command is configured.
 - Before runtime checks, consult `DOCS.md` sections 1 and 5 for database initialization and filesystem effects. Use isolated database and upload locations; the repository has no ready-made isolated runtime setup.
 - Choose checks for the affected code. Include the build when changing compilation configuration; documentation-only changes need text and link review.
